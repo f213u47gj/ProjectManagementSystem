@@ -1,0 +1,30 @@
+﻿@model ProjectManagementSystem.ViewModels.forUser.ChangeEmailViewModel
+@{
+    ViewData["Title"] = "Смена почты";
+}
+
+<div class="container" style="background-color: #f8f9fa; padding: 30px;">
+    <h2 class="mb-4">Настройки</h2>
+
+    <div class="row">
+        <div class="col-md-3">
+            <ul class="list-group mb-4">
+                <a class="list-group-item" href="/Account/Profile">Профиль</a>
+                <a class="list-group-item" href="/Account/ChangePassword">Смена пароля</a>
+                <li class="list-group-item active">Смена почты</li>
+            </ul>
+        </div>
+
+        <div class="col-md-9">
+            <form asp-action="ChangeEmail" method="post">
+                <div class="form-group mb-3">
+                    <label>Новая почта</label>
+                    <input asp-for="NewEmail" class="form-control" type="email" placeholder="example@email.com" />
+                    <span asp-validation-for="NewEmail" class="custom-error"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Изменить почту</button>
+            </form>
+        </div>
+    </div>
+</div>

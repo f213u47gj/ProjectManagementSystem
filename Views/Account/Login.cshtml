@@ -1,0 +1,42 @@
+﻿@model ProjectManagementSystem.ViewModels.forUser.LoginViewModel
+
+@{
+    Layout = null;
+}
+
+<body>
+    <div class="Login">
+        <div class="square-container">
+            <div class="login-text">Вход</div>
+            <div class="separator"></div>
+
+            <form method="post" asp-controller="Account" asp-action="Login">
+                <div asp-validation-summary="ModelOnly" class="custom-error"></div>
+
+                <div>
+                    <span asp-validation-for="UserName" class="custom-error"></span>
+                    <input asp-for="UserName" placeholder="Имя пользователя" autocomplete="off" />
+                </div>
+
+                <div>
+                    <span asp-validation-for="Password" class="custom-error"></span>
+                    <input asp-for="Password" placeholder="Пароль" type="password" autocomplete="off" />
+                </div>
+
+                <div class="rememberme">
+                    <input type="hidden" asp-for="RememberMe" value="false" />
+                    <input asp-for="RememberMe" type="checkbox" id="rememberMe" value="true" />
+                    <label for="rememberMe">Запомнить</label>
+                </div>
+
+                <div class="sunbit-but">
+                    <input type="submit" value="Войти" />
+                    <input type="button" value="Регистрация" class="registration-button" onclick="window.location.href='@Url.Action("Register", "Account")'" />
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+<link rel="stylesheet" href="~/css/forUser/account.css" asp-append-version="true" />
+

@@ -1,0 +1,121 @@
+﻿/* === Общие стили для login и registration === */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f0f2f5;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+}
+
+.Login {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 350px;
+}
+
+.square-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.login-text,
+.register-text {
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+}
+
+.separator {
+    height: 2px;
+    background: #ddd;
+    margin: 10px auto;
+    width: 80%;
+    border-radius: 1px;
+}
+
+/* === Поля ввода === */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input:not([type="checkbox"]):not([type="submit"]):not([type="button"]) {
+    width: 100%;
+    padding: 20px;
+    border: 2px solid #ddd;
+    border-radius: 30px;
+    outline: none;
+    transition: 0.3s;
+    font-size: 14px;
+    background: #f9f9f9;
+}
+
+input:focus {
+    border-color: #007bff;
+    background: white;
+}
+
+.custom-error {
+    color: #d9534f;
+    font-size: 12px;
+    text-align: left;
+    display: block;
+    margin-top: -10px;
+    margin-bottom: 5px;
+}
+
+/* === Запомнить меня (только login) === */
+.rememberme {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #555;
+    margin-top: 5px;
+}
+
+    .rememberme input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+
+/* === Кнопки === */
+.sunbit-but {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+input[type="submit"],
+.registration-button,
+.enter-button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+    input[type="submit"]:hover,
+    .registration-button:hover,
+    .enter-button:hover {
+        background: #0056b3;
+    }
+
+.registration-button,
+.enter-button {
+    background: #6c757d;
+}
+
+    .registration-button:hover,
+    .enter-button:hover {
+        background: #5a6268;
+    }

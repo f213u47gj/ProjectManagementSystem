@@ -1,0 +1,60 @@
+﻿@if ((bool)ViewBag.CanManage)
+{
+    <form asp-action="AddMember" method="post" class="mb-3">
+        <input type="hidden" name="projectId" value="@Model.ProjectId" />
+        <div class="input-group">
+            <input type="email" name="email" class="form-control" placeholder="Email участника" required />
+            <button class="btn btn-primary" type="submit">Добавить</button>
+        </div>
+    </form>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Пользователь (Роль)</th>
+            <th>Изменение роли</th>
+            <th>Удаление</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var member in Model.Members)
+        {
+            <tr>
+                <td>
+                    @member.User?.UserName (@member.User?.Email) —
+                    <strong>@member.Role</strong>
+                </td>
+                <td>
+                    @if ((bool)ViewBag.CanManage)
+                    {
+                        <form asp-action="ChangeRole" method="post" class="d-flex gap-2">
+                            <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                            <input type="hidden" name="userId" value="@member.UserId" />
+                            <select name="newRole" class="form-select form-select-sm">
+                                <option selected disabled>Изменить роль</option>
+                                <option value="Member">Участник</option>
+                                <option value="Manager">Менеджер</option>
+                            </select>
+                            <button class="btn btn-sm btn-secondary" type="submit">Изменить</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Нет доступа</span>
+                    }
+                </td>
+                <td>
+                    @if ((bool)ViewBag.CanManage)
+                    {
+                        <form asp-action="RemoveMember" method="post">
+                            <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                            <input type="hidden" name="userId" value="@member.UserId" />
+                            <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

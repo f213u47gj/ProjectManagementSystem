@@ -1,0 +1,48 @@
+﻿@model ProjectManagementSystem.Models.Project
+
+@{
+    ViewData["Title"] = "Детали проекта";
+    var isOwner = User.Identity?.Name == Model.Owner?.UserName;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm rounded-4 border-0">
+                <div class="card-body p-4">
+                    <h2 class="mb-4">Проект: <span class="text-primary">@Model.Name</span></h2>
+
+                    @if (isOwner)
+                    {
+                        <form asp-action="UpdateDetails" method="post">
+                            <input type="hidden" name="Id" value="@Model.Id" />
+
+                            <div class="mb-3">
+                                <label class="form-label">Название</label>
+                                <input name="Name" class="form-control" value="@Model.Name" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Описание</label>
+                                <textarea name="Description" class="form-control" rows="4" required>@Model.Description</textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-success">Сохранить</button>
+                            <a class="btn btn-outline-secondary ms-2" href="@Url.Action("Board", "Projects", new { id = Model.Id })">Назад</a>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <p><strong>Название:</strong> @Model.Name</p>
+                            <p><strong>Описание:</strong> @Model.Description</p>
+                            <p><strong>Владелец:</strong> @Model.Owner?.UserName</p>
+                            <p><strong>Создан:</strong> @Model.CreatedAt.ToLocalTime().ToString("dd MMMM yyyy, HH:mm")</p>
+                            <a href="@Url.Action("Board", "Projects", new { id = Model.Id })" class="btn btn-secondary mt-2">← Назад к доске</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
