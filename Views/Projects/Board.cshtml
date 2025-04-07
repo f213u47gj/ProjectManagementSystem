@@ -3,6 +3,8 @@
     ViewData["Title"] = "Доска проекта";
 }
 
+<link rel="stylesheet" href="~/css/board.css" />
+
 @functions {
     public string GetStatusTitle(string status)
     {
@@ -27,7 +29,7 @@
                     Детали
                 </button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="/ProjectMembers/Index/@Model.Project.Id">Участники</a></li>
+                    <a class="dropdown-item" href="/ProjectMembers/Index?projectId=@Model.Project.Id">Участники</a>
                     <li><a class="dropdown-item" href="/Projects/Details/@Model.Project.Id">О проекте</a></li>
                 </ul>
             </div>
@@ -100,7 +102,7 @@
 <div class="modal fade" id="editTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <form id="editTaskForm">
-            <div class="modal-content">
+            <div class="modal-content" style="border: 2px; border-color: black;">
                 <div class="modal-header">
                     <h5 class="modal-title">Редактировать задачу</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
@@ -143,12 +145,31 @@
     </div>
 </div>
 
+<div class="modal fade" id="deleteTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Удалить задачу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы действительно хотите удалить задачу <strong id="deleteTaskTitle"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" onclick="deleteTaskConfirmed()">Удалить</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Контекстное меню для задачи -->
 <div id="taskContextMenu" class="position-absolute bg-white border rounded shadow-sm"
      style="display: none; z-index: 1000; min-width: 200px;">
     <ul class="list-unstyled mb-0">
         <li><button class="dropdown-item" onclick="assignUserToTask()">Назначить исполнителя</button></li>
         <li><button class="dropdown-item" onclick="editTask()">Редактировать задачу</button></li>
+        <li><button class="dropdown-item text-danger" onclick="confirmDeleteTask()">Удалить задачу</button></li>
     </ul>
 </div>
 
@@ -260,5 +281,51 @@
             });
         });
 
+        function confirmDeleteTask() {
+            if (!currentTaskId) {
+                alert("ID задачи не выбран");
+                return;
+            }
+
+            // Покажем название задачи в модалке
+            const taskCard = document.querySelector(`.task-card[data-task-id='${currentTaskId}']`);
+            const taskTitle = taskCard?.querySelector('.card-title')?.textContent ?? "(без названия)";
+            document.getElementById("deleteTaskTitle").textContent = taskTitle;
+
+            const modal = new bootstrap.Modal(document.getElementById('deleteTaskModal'));
+            modal.show();
+        }
+
+        function deleteTaskConfirmed() {
+            if (!currentTaskId) return;
+
+            fetch('/ProjectTasks/Delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(currentTaskId)
+            }).then(response => {
+                    console.log("Status code:", response.status);
+
+                    if (response.status === 403) {
+                        alert("У вас нет доступа для удаления этой задачи.");
+                        return;
+                    }
+
+                    if (response.status === 404) {
+                        alert("Задача не найдена");
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        alert("Произошла ошибка при удалении");
+                        return;
+                    }
+
+                    location.reload(); // или перерисовка
+            });
+
+        }
     </script>
 }

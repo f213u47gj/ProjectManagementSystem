@@ -1,0 +1,60 @@
+﻿/* Стиль карточек задач */
+.task-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+    .task-card:hover {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+/* Контекстное меню */
+#taskContextMenu {
+    border: 1px solid black; /* Черная граница */
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    padding: 4px 0;
+    font-size: 0.95rem;
+    z-index: 1000;
+}
+
+
+    #taskContextMenu button.dropdown-item {
+        padding: 10px 20px;
+        width: 100%;
+        text-align: left;
+        border: none;
+        background: none;
+        transition: background-color 0.15s ease;
+    }
+
+        #taskContextMenu button.dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+
+/* Столбцы канбан-доски */
+#board .col-md-4 {
+    border-right: 1px dashed #ddd;
+}
+
+    #board .col-md-4:last-child {
+        border-right: none;
+    }
+
+/* Заголовки статусов */
+h4.text-center {
+    font-weight: 600;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 0.5rem;
+}
+
+/* Общее оформление */
+body {
+    background-color: #f9f9f9;
+}

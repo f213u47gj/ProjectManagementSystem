@@ -81,7 +81,6 @@ namespace ProjectManagementSystem.Controllers
             return View(viewModel);
         }
 
-
         public async Task<IActionResult> Details(int id)
         {
             var project = await _projectRepository.GetProjectByIdAsync(id);

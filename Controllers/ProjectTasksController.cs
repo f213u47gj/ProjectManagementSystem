@@ -15,20 +15,33 @@ namespace ProjectManagementSystem.Controllers
     {
         private readonly IProjectTaskRepository _taskRepository;
         private readonly IProjectMemberRepository _memberRepository;
+        private readonly IProjectRepository _projectRepository;
 
         public ProjectTasksController(
             IProjectTaskRepository taskRepository,
-            IProjectMemberRepository memberRepository)
+            IProjectMemberRepository memberRepository,
+            IProjectRepository projectRepository)
         {
             _taskRepository = taskRepository;
             _memberRepository = memberRepository;
+            _projectRepository = projectRepository;
         }
 
-        private async Task<bool> UserIsMemberAsync(int projectId)
+        private async Task<bool> UserHasRoleAsync(int projectId, params string[] allowedRoles)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var project = await _projectRepository.GetProjectByIdAsync(projectId);
+            if (project == null)
+                return false;
+
+            if (project.OwnerId == userId && allowedRoles.Contains("Owner"))
+                return true;
+
             var members = await _memberRepository.GetProjectMembersAsync(projectId);
-            return members.Any(m => m.UserId == userId);
+            var member = members.FirstOrDefault(m => m.UserId == userId);
+
+            return member != null && allowedRoles.Contains(member.Role);
         }
 
         [HttpPost]
@@ -121,7 +134,7 @@ namespace ProjectManagementSystem.Controllers
             if (task == null)
                 return NotFound();
 
-            if (!await UserIsMemberAsync(task.ProjectId))
+            if (!await UserHasRoleAsync(task.ProjectId, "Owner", "Manager"))
                 return Forbid();
 
             await _taskRepository.DeleteTaskAsync(id);

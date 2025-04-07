@@ -19,10 +19,11 @@ namespace ProjectManagementSystem.Controllers
         private async Task<bool> UserCanManageProject(int projectId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return false;
+            if (string.IsNullOrEmpty(userId)) return false;
 
             var ownerId = await _repository.GetProjectOwnerIdAsync(projectId);
-            if (ownerId == userId) return true;
+            if (!string.IsNullOrEmpty(ownerId) && ownerId == userId)
+                return true;
 
             var member = await _repository.GetProjectMemberAsync(projectId, userId);
             return member?.Role == "Manager";
