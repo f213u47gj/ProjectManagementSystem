@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProjectManagementSystem.IRepositories;
 using ProjectManagementSystem.Models;
 using ProjectManagementSystem.ViewModels.forProject;
+using ProjectManagementSystem.ViewModels.Tasks;
 
 namespace ProjectManagementSystem.Controllers
 {
@@ -12,11 +13,19 @@ namespace ProjectManagementSystem.Controllers
     {
         private readonly IProjectRepository _projectRepository;
         private readonly UserManager<User> _userManager;
+        private readonly IProjectTaskRepository _taskRepository;
+        private readonly IProjectMemberRepository _memberRepository;
 
-        public ProjectsController(IProjectRepository projectRepository, UserManager<User> userManager)
+        public ProjectsController(
+            IProjectRepository projectRepository,
+            UserManager<User> userManager,
+            IProjectTaskRepository taskRepository,
+            IProjectMemberRepository memberRepository)
         {
             _projectRepository = projectRepository;
             _userManager = userManager;
+            _taskRepository = taskRepository;
+            _memberRepository = memberRepository;
         }
 
         public async Task<IActionResult> Index()
@@ -56,25 +65,21 @@ namespace ProjectManagementSystem.Controllers
 
         public async Task<IActionResult> Board(int id)
         {
-            var project = await _projectRepository.GetProjectWithBoardAsync(id);
-            if (project == null) return NotFound();
+            var project = await _projectRepository.GetProjectByIdAsync(id);
+            if (project == null)
+                return NotFound();
 
-            var userId = _userManager.GetUserId(User);
-            var isMember = project.Members.Any(m => m.UserId == userId) || project.OwnerId == userId;
-            if (!isMember)
-                return Forbid();
+            var tasks = await _taskRepository.GetTasksByProjectIdAsync(id);
+            var members = await _memberRepository.GetProjectMembersAsync(id);
 
-            var groupedTasks = project.ProjectTasks
-                .GroupBy(t => t.Status)
-                .ToDictionary(g => g.Key, g => g.ToList());
-
-            var viewModel = new ProjectBoardViewModel
+            var model = new BoardViewModel
             {
                 Project = project,
-                GroupedTasks = groupedTasks
+                Tasks = tasks.ToList(),
+                Members = members.ToList()
             };
 
-            return View(viewModel);
+            return View(model);
         }
 
         public async Task<IActionResult> Details(int id)
@@ -105,7 +110,6 @@ namespace ProjectManagementSystem.Controllers
             await _projectRepository.UpdateProjectAsync(project);
 
             return RedirectToAction("Details", new { id = project.Id });
-
         }
     }
 }

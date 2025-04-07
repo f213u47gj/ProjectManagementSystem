@@ -1,81 +1,142 @@
-﻿@model ProjectManagementSystem.ViewModels.forProject.ProjectBoardViewModel
+﻿@model ProjectManagementSystem.ViewModels.Tasks.BoardViewModel
+
 @{
     ViewData["Title"] = "Доска проекта";
 }
 
-<style>
-    .kanban-board {
-        display: flex;
-        gap: 1rem;
-        overflow-x: auto;
-        padding-bottom: 1rem;
-    }
-
-    .kanban-column {
-        flex: 1 0 300px;
-        background-color: #f9f9f9;
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        padding: 1rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-        .kanban-column h4 {
-            margin-top: 0;
-        }
-
-    .task-card {
-        background: white;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        padding: 0.75rem;
-        margin-bottom: 0.75rem;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        transition: transform 0.1s ease;
-    }
-
-        .task-card:hover {
-            transform: scale(1.02);
-        }
-
-    .dropdown-menu a {
-        cursor: pointer;
-    }
-</style>
-
 <div class="container mt-4">
+
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>@Model.Project.Name</h2>
-        <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Детали
+        <h2 class="mb-0">@Model.Project.Name</h2>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTaskModal">
+                ➕ Создать задачу
             </button>
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="@Url.Action("Details", "Projects", new { id = Model.Project.Id })">Детали проекта</a></li>
-                <li><a class="dropdown-item" href="@Url.Action("Index", "ProjectMembers", new { projectId = Model.Project.Id })">Участники</a></li>
-            </ul>
+
+            <div class="dropdown">
+                <button class="btn btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    ⚙️ Настройки
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item" href="@Url.Action("Details", "Projects", new { id = Model.Project.Id })">
+                            ✏️ Редактировать проект
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="@Url.Action("Index", "ProjectMembers", new { projectId = Model.Project.Id })">
+                            👥 Участники проекта
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 
-    <div class="kanban-board">
-        @foreach (var statusGroup in Model.GroupedTasks)
-        {
-            <div class="kanban-column">
-                <h4>@statusGroup.Key</h4>
-                @foreach (var task in statusGroup.Value)
+    <div class="kanban-board-area">
+        <div class="row">
+            <div class="col-md-4">
+                <h5>Запланировано</h5>
+                @foreach (var task in Model.Tasks.Where(t => t.Status == "Planned"))
                 {
-                    <div class="task-card">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>@task.Title</strong>
-                                <br />
-                                <small>@task.Description</small>
-                            </div>
-                            <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Details", "ProjectTasks", new { id = task.Id })">Открыть</a>
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <h6 class="card-title">@task.Title</h6>
+                            <p class="card-text text-muted small">@task.Description</p>
                         </div>
                     </div>
                 }
             </div>
-        }
+
+            <div class="col-md-4">
+                <h5>В процессе</h5>
+                @foreach (var task in Model.Tasks.Where(t => t.Status == "InProgress"))
+                {
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <h6 class="card-title">@task.Title</h6>
+                            <p class="card-text text-muted small">@task.Description</p>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="col-md-4">
+                <h5>Готово</h5>
+                @foreach (var task in Model.Tasks.Where(t => t.Status == "Done"))
+                {
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <h6 class="card-title">@task.Title</h6>
+                            <p class="card-text text-muted small">@task.Description</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Модальное окно создания задачи -->
+<div class="modal fade" id="createTaskModal" tabindex="-1" aria-labelledby="createTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="@Url.Action("Create", "ProjectTasks", new { projectId = Model.Project.Id })">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createTaskModalLabel">Создать задачу</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="Title" class="form-label">Название</label>
+                        <input type="text" class="form-control" name="Title" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Description" class="form-label">Описание</label>
+                        <textarea class="form-control" name="Description"></textarea>
+                    </div>
+                    <input type="hidden" name="Status" value="Planned" />
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Создать</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .kanban-board-area {
+        background-color: #f4f6f8;
+        border: 2px dashed #ccc;
+        border-radius: 10px;
+        padding: 1rem;
+        position: relative;
+        min-height: 80vh;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .kanban-board-area:hover {
+            border: 2px dashed #ccc;
+            box-shadow: 0 0 10px rgba(139, 0, 0, 0.2);
+        }
+
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .btn-primary {
+        background-color: #8b0000;
+        border-color: #8b0000;
+    }
+
+        .btn-primary:hover {
+            background-color: #a00000;
+            border-color: #a00000;
+        }
+</style>

@@ -20,7 +20,7 @@
             {
                 <div class="col">
                     <a href="@Url.Action("Board", "Projects", new { id = project.Id })" class="text-decoration-none text-dark">
-                        <div class="card h-100 shadow-sm border-0">
+                        <div class="card h-100 shadow-sm border border-light rounded hover-card">
                             <div class="card-body">
                                 <h5 class="card-title">@project.Name</h5>
                                 <p class="card-text text-muted">@project.Description</p>
@@ -32,3 +32,13 @@
         </div>
     }
 </div>
+
+<style>
+    .hover-card {
+        transition: background-color 0.3s ease;
+    }
+
+        .hover-card:hover {
+            background-color: #f8f9fa; /* светло-серый */
+        }
+</style>
