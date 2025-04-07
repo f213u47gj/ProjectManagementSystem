@@ -1,142 +1,264 @@
 ﻿@model ProjectManagementSystem.ViewModels.Tasks.BoardViewModel
-
 @{
     ViewData["Title"] = "Доска проекта";
 }
 
+@functions {
+    public string GetStatusTitle(string status)
+    {
+        return status switch
+        {
+            "ToDo" => "📋 К выполнению",
+            "InProgress" => "⏳ В процессе",
+            "Done" => "✅ Готово",
+            _ => status
+        };
+    }
+}
+
 <div class="container mt-4">
-
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">@Model.Project.Name</h2>
-
+        <h2>@Model.Project.Name</h2>
         <div class="d-flex gap-2">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTaskModal">
-                ➕ Создать задачу
-            </button>
+            <button class="btn btn-success" onclick="openCreateModalFromButton()">Создать задачу</button>
 
             <div class="dropdown">
-                <button class="btn btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    ⚙️ Настройки
+                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    Детали
                 </button>
                 <ul class="dropdown-menu">
-                    <li>
-                        <a class="dropdown-item" href="@Url.Action("Details", "Projects", new { id = Model.Project.Id })">
-                            ✏️ Редактировать проект
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="@Url.Action("Index", "ProjectMembers", new { projectId = Model.Project.Id })">
-                            👥 Участники проекта
-                        </a>
-                    </li>
+                    <li><a class="dropdown-item" href="/ProjectMembers/Index/@Model.Project.Id">Участники</a></li>
+                    <li><a class="dropdown-item" href="/Projects/Details/@Model.Project.Id">О проекте</a></li>
                 </ul>
             </div>
         </div>
     </div>
 
-    <div class="kanban-board-area">
-        <div class="row">
-            <div class="col-md-4">
-                <h5>Запланировано</h5>
-                @foreach (var task in Model.Tasks.Where(t => t.Status == "Planned"))
-                {
-                    <div class="card mb-2">
-                        <div class="card-body">
-                            <h6 class="card-title">@task.Title</h6>
-                            <p class="card-text text-muted small">@task.Description</p>
-                        </div>
-                    </div>
-                }
-            </div>
+    <div id="board"
+         class="row p-4 mb-5"
+         style="min-width: 1500px; min-height: 700px; border: 3px dashed #ccc; border-radius: 8px;"
+         oncontextmenu="openCreateModal(event)">
 
+        @foreach (var status in new[] { "ToDo", "InProgress", "Done" })
+        {
             <div class="col-md-4">
-                <h5>В процессе</h5>
-                @foreach (var task in Model.Tasks.Where(t => t.Status == "InProgress"))
-                {
-                    <div class="card mb-2">
-                        <div class="card-body">
-                            <h6 class="card-title">@task.Title</h6>
-                            <p class="card-text text-muted small">@task.Description</p>
+                <h4 class="text-center mb-3">@GetStatusTitle(status)</h4>
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var task in Model.Tasks.Where(t => t.Status == status))
+                    {
+                        <div class="card task-card" data-task-id="@task.Id" oncontextmenu="showTaskContextMenu(event, @task.Id)">
+                            <div class="card-body">
+                                <h5 class="card-title">@task.Title</h5>
+                                <p class="card-text">@task.Description</p>
+                            </div>
                         </div>
-                    </div>
-                }
+                    }
+                </div>
             </div>
-
-            <div class="col-md-4">
-                <h5>Готово</h5>
-                @foreach (var task in Model.Tasks.Where(t => t.Status == "Done"))
-                {
-                    <div class="card mb-2">
-                        <div class="card-body">
-                            <h6 class="card-title">@task.Title</h6>
-                            <p class="card-text text-muted small">@task.Description</p>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
+        }
     </div>
 </div>
 
 <!-- Модальное окно создания задачи -->
-<div class="modal fade" id="createTaskModal" tabindex="-1" aria-labelledby="createTaskModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="post" action="@Url.Action("Create", "ProjectTasks", new { projectId = Model.Project.Id })">
+<div class="modal fade" id="createTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form id="createTaskForm">
+            <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="createTaskModalLabel">Создать задачу</h5>
+                    <h5 class="modal-title">Создать задачу</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
+                    <input type="hidden" name="ProjectId" value="@Model.Project.Id" />
+                    <input type="hidden" name="Status" value="ToDo" />
+
                     <div class="mb-3">
-                        <label for="Title" class="form-label">Название</label>
-                        <input type="text" class="form-control" name="Title" required />
+                        <label class="form-label">Название</label>
+                        <input type="text" name="Title" class="form-control" required />
                     </div>
+
                     <div class="mb-3">
-                        <label for="Description" class="form-label">Описание</label>
-                        <textarea class="form-control" name="Description"></textarea>
+                        <label class="form-label">Описание</label>
+                        <textarea name="Description" class="form-control"></textarea>
                     </div>
-                    <input type="hidden" name="Status" value="Planned" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Срок</label>
+                        <input type="date" name="DueDate" class="form-control" />
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Создать</button>
+                    <button type="submit" class="btn btn-success">Создать</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 </div>
 
-<style>
-    .kanban-board-area {
-        background-color: #f4f6f8;
-        border: 2px dashed #ccc;
-        border-radius: 10px;
-        padding: 1rem;
-        position: relative;
-        min-height: 80vh;
-        box-sizing: border-box;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
+<!-- Модальное окно редактирования задачи -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form id="editTaskForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактировать задачу</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="editTaskId" />
+                    <input type="hidden" name="ProjectId" value="@Model.Project.Id" />
 
-        .kanban-board-area:hover {
-            border: 2px dashed #ccc;
-            box-shadow: 0 0 10px rgba(139, 0, 0, 0.2);
+                    <div class="mb-3">
+                        <label class="form-label">Название</label>
+                        <input type="text" name="Title" id="editTaskTitle" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Описание</label>
+                        <textarea name="Description" id="editTaskDescription" class="form-control"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Статус</label>
+                        <select name="Status" id="editTaskStatus" class="form-select">
+                            <option value="ToDo">📋 К выполнению</option>
+                            <option value="InProgress">⏳ В процессе</option>
+                            <option value="Done">✅ Готово</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Срок</label>
+                        <input type="date" name="DueDate" id="editTaskDueDate" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Контекстное меню для задачи -->
+<div id="taskContextMenu" class="position-absolute bg-white border rounded shadow-sm"
+     style="display: none; z-index: 1000; min-width: 200px;">
+    <ul class="list-unstyled mb-0">
+        <li><button class="dropdown-item" onclick="assignUserToTask()">Назначить исполнителя</button></li>
+        <li><button class="dropdown-item" onclick="editTask()">Редактировать задачу</button></li>
+    </ul>
+</div>
+
+@section Scripts {
+    <script>
+        let currentTaskId = null;
+
+        function openCreateModal(event) {
+            if (event) {
+                const target = event.target.closest('.task-card');
+                if (target) return; // Не открывать модалку, если ПКМ по задаче
+                event.preventDefault();
+            }
+
+            let modal = new bootstrap.Modal(document.getElementById('createTaskModal'));
+            modal.show();
         }
 
-    .card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .btn-primary {
-        background-color: #8b0000;
-        border-color: #8b0000;
-    }
-
-        .btn-primary:hover {
-            background-color: #a00000;
-            border-color: #a00000;
+        function openCreateModalFromButton() {
+            openCreateModal();
         }
-</style>
+
+        document.getElementById('createTaskForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            fetch('/ProjectTasks/Create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(response => {
+                if (!response.ok) throw new Error("Ошибка при создании задачи");
+                location.reload();
+            }).catch(err => {
+                alert(err.message);
+            });
+        });
+
+        function showTaskContextMenu(event, taskId) {
+            event.preventDefault();
+            currentTaskId = taskId;
+
+            const menu = document.getElementById("taskContextMenu");
+            menu.style.left = `${event.pageX}px`;
+            menu.style.top = `${event.pageY}px`;
+            menu.style.display = "block";
+
+            document.addEventListener("click", hideTaskContextMenu);
+        }
+
+        function hideTaskContextMenu() {
+            document.getElementById("taskContextMenu").style.display = "none";
+            document.removeEventListener("click", hideTaskContextMenu);
+        }
+
+        function assignUserToTask() {
+            alert("Назначение исполнителя задаче ID: " + currentTaskId);
+            // Тут можно вызвать модалку или открыть другую страницу
+        }
+
+        function editTask() {
+            alert("Редактирование задачи ID: " + currentTaskId);
+            // Тут можно открыть модалку редактирования
+        }
+
+        function editTask() {
+            fetch(`/ProjectTasks/Get/${currentTaskId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Не удалось загрузить задачу");
+                    return response.json();
+                })
+                .then(task => {
+                    document.getElementById("editTaskId").value = task.id;
+                    document.getElementById("editTaskTitle").value = task.title;
+                    document.getElementById("editTaskDescription").value = task.description;
+                    document.getElementById("editTaskStatus").value = task.status;
+                    document.getElementById("editTaskDueDate").value = task.dueDate?.substring(0, 10) ?? "";
+
+                    let modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
+                    modal.show();
+                })
+                .catch(err => {
+                    alert(err.message);
+                });
+        }
+
+        document.getElementById('editTaskForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            // Добавим ProjectId вручную
+            data.ProjectId = @Model.Project.Id;
+
+            fetch('/ProjectTasks/Edit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(response => {
+                if (!response.ok) throw new Error("Ошибка при сохранении задачи");
+                location.reload();
+            }).catch(err => {
+                alert(err.message);
+            });
+        });
+
+    </script>
+}

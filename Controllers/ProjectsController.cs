@@ -66,21 +66,21 @@ namespace ProjectManagementSystem.Controllers
         public async Task<IActionResult> Board(int id)
         {
             var project = await _projectRepository.GetProjectByIdAsync(id);
-            if (project == null)
-                return NotFound();
+            if (project == null) return NotFound();
 
             var tasks = await _taskRepository.GetTasksByProjectIdAsync(id);
             var members = await _memberRepository.GetProjectMembersAsync(id);
 
-            var model = new BoardViewModel
+            var viewModel = new BoardViewModel
             {
                 Project = project,
                 Tasks = tasks.ToList(),
                 Members = members.ToList()
             };
 
-            return View(model);
+            return View(viewModel);
         }
+
 
         public async Task<IActionResult> Details(int id)
         {

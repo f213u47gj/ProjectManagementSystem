@@ -40,9 +40,16 @@ namespace ProjectManagementSystem.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateTaskAsync(ProjectTask task)
+        public async Task UpdateTaskAsync(ProjectTask updatedTask)
         {
-            _context.ProjectTasks.Update(task);
+            var existingTask = await _context.ProjectTasks.FindAsync(updatedTask.Id);
+            if (existingTask == null) return;
+
+            existingTask.Title = updatedTask.Title;
+            existingTask.Description = updatedTask.Description;
+            existingTask.Status = updatedTask.Status;
+            existingTask.DueDate = updatedTask.DueDate;
+
             await _context.SaveChangesAsync();
         }
 
@@ -55,5 +62,11 @@ namespace ProjectManagementSystem.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<ProjectTask?> GetByIdAsync(int id)
+        {
+            return await _context.ProjectTasks.FirstOrDefaultAsync(t => t.Id == id);
+        }
+
     }
 }

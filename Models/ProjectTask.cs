@@ -15,7 +15,7 @@ namespace ProjectManagementSystem.Models
 
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
-        public Project Project { get; set; } = null!;
+        public Project Project { get; set; }
 
         public string Status { get; set; } = "todo";
 

@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProjectManagementSystem.IRepositories;
 using ProjectManagementSystem.Models;
+using ProjectManagementSystem.Repositories;
 using ProjectManagementSystem.ViewModels.Tasks;
+using ProjectManagementSystem.Views.ProjectTasks;
 using System.Security.Claims;
 
 namespace ProjectManagementSystem.Controllers
@@ -29,53 +32,86 @@ namespace ProjectManagementSystem.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateTaskViewModel model)
+        [Route("ProjectTasks/Create")]
+        public async Task<IActionResult> Create([FromBody] ProjectTaskViewModel model)
         {
             if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-                return BadRequest(new { errors });
-            }
-
-            if (!await UserIsMemberAsync(model.ProjectId))
-                return Forbid();
+                return BadRequest(ModelState);
 
             var task = new ProjectTask
             {
+                ProjectId = model.ProjectId,
                 Title = model.Title,
                 Description = model.Description,
-                ProjectId = model.ProjectId,
                 Status = model.Status,
-                DueDate = model.DueDate
+                DueDate = model.DueDate,
+                CreatedAt = DateTime.UtcNow
             };
 
             await _taskRepository.CreateTaskAsync(task);
-            return Ok(task); // Можно вернуть task.Id, если нужно
+            return Ok();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit([FromBody] EditTaskViewModel model)
+        public async Task<IActionResult> Edit([FromBody] ProjectTask updatedTask)
         {
-            if (!ModelState.IsValid)
+            var existingTask = await _taskRepository.GetByIdAsync(updatedTask.Id);
+            if (existingTask == null)
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-                return BadRequest(new { errors });
+                return NotFound("Задача не найдена");
             }
 
-            var existing = await _taskRepository.GetTaskByIdAsync(model.Id);
-            if (existing == null)
-                return NotFound();
+            ModelState.Remove("Project");
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Некорректные данные");
+            }
 
-            if (!await UserIsMemberAsync(existing.ProjectId))
-                return Forbid();
+            existingTask.Title = updatedTask.Title;
+            existingTask.Description = updatedTask.Description;
+            existingTask.Status = updatedTask.Status;
+            existingTask.DueDate = updatedTask.DueDate;
 
-            existing.Title = model.Title;
-            existing.Description = model.Description;
-            existing.Status = model.Status ?? "todo";
-            existing.DueDate = model.DueDate;
-
-            await _taskRepository.UpdateTaskAsync(existing);
+            await _taskRepository.UpdateTaskAsync(existingTask);
             return Ok();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateOrUpdate(ProjectTaskViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (model.Id == 0)
+            {
+                var task = new ProjectTask
+                {
+                    ProjectId = model.ProjectId,
+                    Title = model.Title,
+                    Description = model.Description,
+                    Status = model.Status,
+                    CreatedAt = DateTime.UtcNow,
+                    DueDate = model.DueDate
+                };
+
+                await _taskRepository.CreateTaskAsync(task);
+            }
+            else
+            {
+                var task = await _taskRepository.GetTaskByIdAsync(model.Id);
+                if (task == null || task.ProjectId != model.ProjectId)
+                    return NotFound();
+
+                task.Title = model.Title;
+                task.Description = model.Description;
+                task.Status = model.Status;
+                task.DueDate = model.DueDate;
+
+                await _taskRepository.UpdateTaskAsync(task);
+            }
+
+            return Json(new { success = true });
         }
 
         [HttpPost]
@@ -93,16 +129,19 @@ namespace ProjectManagementSystem.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetTask(int id)
+        public async Task<IActionResult> Get(int id)
         {
             var task = await _taskRepository.GetTaskByIdAsync(id);
-            if (task == null)
-                return NotFound();
+            if (task == null) return NotFound();
 
-            if (!await UserIsMemberAsync(task.ProjectId))
-                return Forbid();
-
-            return Json(task);
+            return Json(new
+            {
+                id = task.Id,
+                title = task.Title,
+                description = task.Description,
+                status = task.Status,
+                dueDate = task.DueDate?.ToString("yyyy-MM-dd")
+            });
         }
     }
 }
