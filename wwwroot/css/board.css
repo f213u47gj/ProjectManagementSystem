@@ -22,6 +22,7 @@
     padding: 4px 0;
     font-size: 0.95rem;
     z-index: 1000;
+    position: fixed;
 }
 
 

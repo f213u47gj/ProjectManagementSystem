@@ -1,6 +1,7 @@
 ﻿@model ProjectManagementSystem.ViewModels.Tasks.BoardViewModel
 @{
     ViewData["Title"] = "Доска проекта";
+    bool CanEdit = Model.CurrentUserRole == "Owner" || Model.CurrentUserRole == "Manager";
 }
 
 <link rel="stylesheet" href="~/css/board.css" />
@@ -145,6 +146,27 @@
     </div>
 </div>
 
+<div class="modal fade" id="viewTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border: 2px solid #ccc;">
+            <div class="modal-header">
+                <h5 class="modal-title">Просмотр задачи</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <h5 id="viewTaskTitle" class="mb-3"></h5>
+                <p><strong>Описание:</strong></p>
+                <p id="viewTaskDescription"></p>
+                <p><strong>Статус:</strong> <span id="viewTaskStatus"></span></p>
+                <p><strong>Срок:</strong> <span id="viewTaskDueDate"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="deleteTaskModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content border-danger">
@@ -163,13 +185,19 @@
     </div>
 </div>
 
-<!-- Контекстное меню для задачи -->
 <div id="taskContextMenu" class="position-absolute bg-white border rounded shadow-sm"
      style="display: none; z-index: 1000; min-width: 200px;">
     <ul class="list-unstyled mb-0">
-        <li><button class="dropdown-item" onclick="assignUserToTask()">Назначить исполнителя</button></li>
-        <li><button class="dropdown-item" onclick="editTask()">Редактировать задачу</button></li>
-        <li><button class="dropdown-item text-danger" onclick="confirmDeleteTask()">Удалить задачу</button></li>
+        @if (CanEdit)
+        {
+            <li><button class="dropdown-item" onclick="assignUserToTask()">Назначить исполнителя</button></li>
+            <li><button class="dropdown-item" onclick="editTask()">Редактировать задачу</button></li>
+            <li><button class="dropdown-item text-danger" onclick="confirmDeleteTask()">Удалить задачу</button></li>
+        }
+        else
+        {
+            <li><button class="dropdown-item" onclick="viewTask()">Просмотр задачи</button></li>
+        }
     </ul>
 </div>
 
@@ -327,5 +355,26 @@
             });
 
         }
+
+        function viewTask() {
+            fetch(`/ProjectTasks/Get/${currentTaskId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Не удалось загрузить задачу");
+                    return response.json();
+                })
+                .then(task => {
+                    document.getElementById("viewTaskTitle").textContent = task.title;
+                    document.getElementById("viewTaskDescription").textContent = task.description ?? "(Нет описания)";
+                    document.getElementById("viewTaskStatus").textContent = task.status;
+                    document.getElementById("viewTaskDueDate").textContent = task.dueDate?.substring(0, 10) ?? "(Без срока)";
+
+                    let modal = new bootstrap.Modal(document.getElementById('viewTaskModal'));
+                    modal.show();
+                })
+                .catch(err => {
+                    alert(err.message);
+                });
+        }
+
     </script>
 }

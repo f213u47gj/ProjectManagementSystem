@@ -68,14 +68,31 @@ namespace ProjectManagementSystem.Controllers
             var project = await _projectRepository.GetProjectByIdAsync(id);
             if (project == null) return NotFound();
 
+            var userId = _userManager.GetUserId(User);
+            var isMember = project.OwnerId == userId || project.Members.Any(m => m.UserId == userId);
+            if (!isMember) return Forbid();
+
             var tasks = await _taskRepository.GetTasksByProjectIdAsync(id);
             var members = await _memberRepository.GetProjectMembersAsync(id);
+
+            string currentUserRole;
+
+            if (project.OwnerId == userId)
+            {
+                currentUserRole = "Owner";
+            }
+            else
+            {
+                var currentMember = members.FirstOrDefault(m => m.UserId == userId);
+                currentUserRole = currentMember?.Role ?? "Member";
+            }
 
             var viewModel = new BoardViewModel
             {
                 Project = project,
                 Tasks = tasks.ToList(),
-                Members = members.ToList()
+                Members = members.ToList(),
+                CurrentUserRole = currentUserRole
             };
 
             return View(viewModel);

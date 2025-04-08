@@ -8,5 +8,6 @@
         public string? Description { get; set; }
         public DateTime? DueDate { get; set; }
         public string Status { get; set; }
+        public bool IsReadOnly { get; set; } = false;
     }
 }

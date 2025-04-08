@@ -9,6 +9,7 @@ namespace ProjectManagementSystem.ViewModels.Tasks
 
         public List<ProjectTask> Tasks { get; set; }
 
-        public List<ProjectMember>? Members { get; set; } // Необязательно, если хочешь отобразить участников
+        public List<ProjectMember>? Members { get; set; }
+        public string CurrentUserRole { get; set; }
     }
 }

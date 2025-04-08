@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectManagementSystem.IRepositories;
@@ -16,15 +17,18 @@ namespace ProjectManagementSystem.Controllers
         private readonly IProjectTaskRepository _taskRepository;
         private readonly IProjectMemberRepository _memberRepository;
         private readonly IProjectRepository _projectRepository;
+        private readonly UserManager<User> _userManager;
 
         public ProjectTasksController(
             IProjectTaskRepository taskRepository,
             IProjectMemberRepository memberRepository,
-            IProjectRepository projectRepository)
+            IProjectRepository projectRepository,
+            UserManager<User> userManager)
         {
             _taskRepository = taskRepository;
             _memberRepository = memberRepository;
             _projectRepository = projectRepository;
+            _userManager = userManager;
         }
 
         private async Task<bool> UserHasRoleAsync(int projectId, params string[] allowedRoles)
@@ -155,6 +159,29 @@ namespace ProjectManagementSystem.Controllers
                 status = task.Status,
                 dueDate = task.DueDate?.ToString("yyyy-MM-dd")
             });
+        }
+
+        public async Task<IActionResult> ViewTask(int id)
+        {
+            var task = await _taskRepository.GetTaskByIdAsync(id);
+            if (task == null)
+                return NotFound();
+
+            var userId = Guid.Parse(_userManager.GetUserId(User));
+            var role = await _memberRepository.GetUserRoleAsync(task.ProjectId, userId);
+
+            var viewModel = new ProjectTaskViewModel
+            {
+                Id = task.Id,
+                Title = task.Title,
+                Description = task.Description,
+                Status = task.Status,
+                DueDate = task.DueDate,
+                ProjectId = task.ProjectId,
+                IsReadOnly = true
+            };
+
+            return PartialView("_TaskModal", viewModel);
         }
     }
 }

@@ -85,5 +85,14 @@ namespace ProjectManagementSystem.Repositories
                 .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
         }
 
+        public async Task<string?> GetUserRoleAsync(int projectId, Guid userId)
+        {
+            string userIdString = userId.ToString();
+
+            return await _context.ProjectMembers
+                .Where(pm => pm.ProjectId == projectId && pm.UserId == userIdString)
+                .Select(pm => pm.Role)
+                .FirstOrDefaultAsync();
+        }
     }
 }

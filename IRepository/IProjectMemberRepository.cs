@@ -10,6 +10,7 @@ namespace ProjectManagementSystem.IRepositories
         Task<bool> ChangeMemberRoleAsync(int projectId, string userId, string newRole);
         Task<string?> GetProjectOwnerIdAsync(int projectId);
         Task<ProjectMember?> GetProjectMemberAsync(int projectId, string userId); // ✅ Добавлено
+        Task<string?> GetUserRoleAsync(int projectId, Guid userId);
     }
 
 }
