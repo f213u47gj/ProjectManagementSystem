@@ -11,6 +11,7 @@ namespace ProjectManagementSystem.IRepositories
         Task<bool> CreateProjectAsync(Project project, ClaimsPrincipal user);
         Task<bool> AddMemberByEmailAsync(int projectId, string email);
         Task UpdateProjectAsync(Project project);
+        Task DeleteProjectAsync(Project project);
 
     }
 }

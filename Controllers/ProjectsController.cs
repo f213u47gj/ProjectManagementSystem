@@ -127,5 +127,19 @@ namespace ProjectManagementSystem.Controllers
 
             return RedirectToAction("Details", new { id = project.Id });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var project = await _projectRepository.GetProjectByIdAsync(id);
+            if (project == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            if (project.OwnerId != userId) return Forbid();
+
+            await _projectRepository.DeleteProjectAsync(project);
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
