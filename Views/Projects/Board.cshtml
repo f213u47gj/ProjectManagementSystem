@@ -52,7 +52,8 @@
                         <div class="card task-card" data-task-id="@task.Id" oncontextmenu="showTaskContextMenu(event, @task.Id)">
                             <div class="card-body">
                                 <h5 class="card-title">@task.Title</h5>
-                                <p class="card-text">@task.Description</p>
+                                <p class="card-text">Описание: @task.Description</p>
+                                <p class="card-text">Срок сдачи: @task.DueDate?.ToString("dd.MM.yyyy")</p>
                             </div>
                         </div>
                     }
@@ -365,7 +366,7 @@
                 .then(task => {
                     document.getElementById("viewTaskTitle").textContent = task.title;
                     document.getElementById("viewTaskDescription").textContent = task.description ?? "(Нет описания)";
-                    document.getElementById("viewTaskStatus").textContent = task.status;
+                    document.getElementById("viewTaskStatus").textContent = getLocalizedStatus(task.status);
                     document.getElementById("viewTaskDueDate").textContent = task.dueDate?.substring(0, 10) ?? "(Без срока)";
 
                     let modal = new bootstrap.Modal(document.getElementById('viewTaskModal'));
@@ -374,6 +375,15 @@
                 .catch(err => {
                     alert(err.message);
                 });
+        }
+
+        function getLocalizedStatus(status) {
+            switch (status) {
+                case "ToDo": return "📋 К выполнению";
+                case "InProgress": return "⏳ В процессе";
+                case "Done": return "✅ Готово";
+                default: return status;
+            }
         }
 
     </script>
