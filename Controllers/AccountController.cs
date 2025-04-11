@@ -11,14 +11,16 @@ namespace ProjectManagementSystem.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
 
-        public AccountController(IUserRepository userRepository, UserManager<User> userManager)
+        public AccountController(IUserRepository userRepository, UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _userRepository = userRepository;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
-        // 🔐 Login
+
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Login()

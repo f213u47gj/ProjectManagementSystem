@@ -1,4 +1,8 @@
 ﻿@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using ProjectManagementSystem.Models
+@inject UserManager<ProjectManagementSystem.Models.User> UserManager
+@inject SignInManager<ProjectManagementSystem.Models.User> SignInManager
 
 <!DOCTYPE html>
 <html lang="en">
@@ -27,9 +31,11 @@
             margin-right: 8px;
         }
 
-        .user-placeholder {
-            font-weight: 600;
-            padding: 0.5rem 1rem;
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 50%;
         }
     </style>
 </head>
@@ -37,49 +43,29 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid d-flex justify-content-between align-items-center">
-
                 <a class="navbar-brand d-flex align-items-center" asp-controller="Projects" asp-action="Index">
                     <img src="/images/logo-icon.png" alt="Logo" />
-                    <span class="fw-bold">СУП</span>
+                    <span class="fw-bold">WorkNest</span>
                 </a>
 
-                @if (User.Identity?.IsAuthenticated ?? false)
+                @if (SignInManager.IsSignedIn(User))
                 {
-                    string avatarUrlRaw = User.FindFirst("AvatarUrl")?.Value;
-                    string avatarUrl = string.IsNullOrWhiteSpace(avatarUrlRaw) ? null : avatarUrlRaw;
+                    var currentUser = await UserManager.GetUserAsync(User);
+                    var avatarUrl = currentUser?.AvatarUrl ?? "/images/default-avatar.png";
 
-                    if (!string.IsNullOrEmpty(avatarUrl))
-                    {
-                        <div class="dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="@avatarUrl" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">Профиль</a></li>
-                                <li>
-                                    <form asp-controller="Account" asp-action="Logout" method="post">
-                                        <button type="submit" class="dropdown-item dropdown-item-btn">Выход</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="dropdown">
-                            <a class="nav-link dropdown-toggle user-placeholder" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                @User.Identity.Name
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">Профиль</a></li>
-                                <li>
-                                    <form asp-controller="Account" asp-action="Logout" method="post">
-                                        <button type="submit" class="dropdown-item dropdown-item-btn">Выход</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    }
+                    <div class="dropdown ms-auto">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="@avatarUrl" title="@User.Identity.Name" alt="Avatar" class="user-avatar" />
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">Профиль</a></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" class="dropdown-item dropdown-item-btn">Выход</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
                 }
             </div>
         </nav>
