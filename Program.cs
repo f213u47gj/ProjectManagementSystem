@@ -43,7 +43,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
-builder.Services.AddScoped<IProjectTaskRepository, ProjectTaskRepository>();    
+builder.Services.AddScoped<IProjectTaskRepository, ProjectTaskRepository>();
+builder.Services.AddScoped<ITaskAssigneeRepository, TaskAssigneeRepository>();
+
 
 builder.Services.AddControllersWithViews(options =>
 {
