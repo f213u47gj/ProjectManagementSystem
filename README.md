@@ -15,9 +15,8 @@
 ✔️ Удобный интерфейс для командной работы  
 
 ## 🎥 Видео работы веб-приложения
-<a href="https://youtu.be/Qj-1d6-LOgc" target="_blank">
-  <img src="https://img.youtube.com/vi/Qj-1d6-LOgc/maxresdefault.jpg" alt="Demo Video" width="600">
-</a>
+## 🎥 Видео-демонстрация
+[![Демо работы приложения](https://img.youtube.com/vi/Qj-1d6-LOgc/maxresdefault.jpg)](https://youtu.be/Qj-1d6-LOgc)
 
 ## 🖼️ Скриншоты
 ![image](https://github.com/user-attachments/assets/5560fb69-6ed5-4b06-8a80-6c64a97c546a)
