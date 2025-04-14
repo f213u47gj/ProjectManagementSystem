@@ -3,7 +3,6 @@
 Удобная и современная система для управления проектами, задачами и командой!  
 
 ![Project Management System](https://img.shields.io/badge/Status-Developing-yellow) 
-![GitHub](https://img.shields.io/github/license/f213u47gj/ProjectManagementSystem?color=blue) 
 ![GitHub last commit](https://img.shields.io/github/last-commit/f213u47gj/ProjectManagementSystem?color=green)
 
 ## 📌 О проекте
