@@ -18,8 +18,8 @@
 📌 **Сюда будет загружено демонстрационное видео**  
 
 ## 🖼️ Скриншоты
-![Главная страница](![image](https://github.com/user-attachments/assets/5560fb69-6ed5-4b06-8a80-6c64a97c546a))  
-![Список задач](![image](https://github.com/user-attachments/assets/355ac658-f8c9-49b0-91ea-b3a21509d5f1)) 
+![image](https://github.com/user-attachments/assets/5560fb69-6ed5-4b06-8a80-6c64a97c546a))  
+![image](https://github.com/user-attachments/assets/355ac658-f8c9-49b0-91ea-b3a21509d5f1)) 
 
 ## ⚙️ Технологии
 ### **Backend**
