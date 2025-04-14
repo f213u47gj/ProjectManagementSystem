@@ -29,7 +29,7 @@
 - 📦 `MS SQL Server` (база данных)
 
 ### **Frontend**
-- 🎨 `Razor Pages` (динамические страницы)
+- 🎨 `MVC Views` (страницы)
 - 🌈 `Bootstrap 5` + `FontAwesome` (стили и иконки)
 
 ## 🛠️ Установка и запуск
