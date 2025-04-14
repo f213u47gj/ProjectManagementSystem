@@ -244,6 +244,7 @@
     <ul class="list-unstyled mb-0">
         @if (CanEdit)
         {
+            <li><button class="dropdown-item" onclick="viewTask()">Просмотр задачи</button></li>
             <li><button class="dropdown-item" onclick="assignUserToTask()">Назначить исполнителя</button></li>
             <li><button class="dropdown-item" onclick="editTask()">Редактировать задачу</button></li>
             <li><button class="dropdown-item text-danger" onclick="confirmDeleteTask()">Удалить задачу</button></li>
