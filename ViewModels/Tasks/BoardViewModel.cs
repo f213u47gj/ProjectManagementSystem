@@ -11,5 +11,6 @@ namespace ProjectManagementSystem.ViewModels.Tasks
 
         public List<ProjectMember>? Members { get; set; }
         public string CurrentUserRole { get; set; }
+        public User CurrentUser { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManagementSystem.IRepositories;
 using ProjectManagementSystem.Models;
+using ProjectManagementSystem.Repositories;
 using ProjectManagementSystem.ViewModels.forProject;
 using ProjectManagementSystem.ViewModels.Tasks;
 
@@ -15,17 +16,20 @@ namespace ProjectManagementSystem.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IProjectTaskRepository _taskRepository;
         private readonly IProjectMemberRepository _memberRepository;
+        private IUserRepository _userRepository;
 
         public ProjectsController(
             IProjectRepository projectRepository,
             UserManager<User> userManager,
             IProjectTaskRepository taskRepository,
-            IProjectMemberRepository memberRepository)
+            IProjectMemberRepository memberRepository,
+            IUserRepository userRepository)
         {
             _projectRepository = projectRepository;
             _userManager = userManager;
             _taskRepository = taskRepository;
             _memberRepository = memberRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<IActionResult> Index()
@@ -74,6 +78,9 @@ namespace ProjectManagementSystem.Controllers
 
             var tasks = await _taskRepository.GetTasksByProjectIdAsync(id);
             var members = await _memberRepository.GetProjectMembersAsync(id);
+            var currentUserId = _userManager.GetUserId(User);
+            var currentUser = await _userRepository.GetUserByIdAsync(currentUserId);
+
 
             string currentUserRole;
 
@@ -92,7 +99,8 @@ namespace ProjectManagementSystem.Controllers
                 Project = project,
                 Tasks = tasks.ToList(),
                 Members = members.ToList(),
-                CurrentUserRole = currentUserRole
+                CurrentUserRole = currentUserRole,
+                CurrentUser = currentUser
             };
 
             return View(viewModel);

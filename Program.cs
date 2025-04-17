@@ -45,6 +45,7 @@ builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
 builder.Services.AddScoped<IProjectTaskRepository, ProjectTaskRepository>();
 builder.Services.AddScoped<ITaskAssigneeRepository, TaskAssigneeRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 
 
 builder.Services.AddControllersWithViews(options =>
@@ -61,6 +62,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
 
 app.MapControllerRoute(
     name: "default",

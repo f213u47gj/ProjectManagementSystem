@@ -172,22 +172,31 @@
     </div>
 </div>
 
-<div class="modal fade" id="viewTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content" style="border: 2px solid #ccc;">
-            <div class="modal-header">
-                <h5 class="modal-title">Просмотр задачи</h5>
+<div class="modal fade" id="viewTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title" id="viewTaskTitle">Задача</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
             <div class="modal-body">
-                <h5 id="viewTaskTitle" class="mb-3"></h5>
-                <p><strong>Описание:</strong></p>
-                <p id="viewTaskDescription"></p>
+                <p><strong>Описание:</strong> <span id="viewTaskDescription"></span></p>
                 <p><strong>Статус:</strong> <span id="viewTaskStatus"></span></p>
                 <p><strong>Срок:</strong> <span id="viewTaskDueDate"></span></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+
+                <div class="comments-section mt-4">
+                    <h6 class="mb-3">💬 Комментарии</h6>
+
+                    <div id="modalCommentsList" class="mb-3">
+                        <p class="text-muted">Загрузка комментариев...</p>
+                    </div>
+
+                    <form id="modalCommentForm" class="d-flex flex-column" method="post">
+                        @Html.AntiForgeryToken()
+                        <textarea id="modalCommentInput" class="form-control mb-2" rows="2" placeholder="Напишите комментарий..." required></textarea>
+                        <button type="submit" class="btn btn-primary align-self-end">Отправить</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -418,16 +427,21 @@
                     return response.json();
                 })
                 .then(task => {
+                    // Заполняем данные задачи
                     document.getElementById("viewTaskTitle").textContent = task.title;
-                    document.getElementById("viewTaskDescription").textContent = task.description ?? "(Нет описания)";
+                    document.getElementById("viewTaskDescription").textContent = task.description?.trim() || "(Нет описания)";
                     document.getElementById("viewTaskStatus").textContent = getLocalizedStatus(task.status);
-                    document.getElementById("viewTaskDueDate").textContent = task.dueDate?.substring(0, 10) ?? "(Без срока)";
+                    document.getElementById("viewTaskDueDate").textContent = task.dueDate?.substring(0, 10) || "(Без срока)";
 
-                    let modal = new bootstrap.Modal(document.getElementById('viewTaskModal'));
+                    // Загружаем комментарии
+                    loadModalComments(task.id);
+
+                    // Показываем модальное окно
+                    const modal = new bootstrap.Modal(document.getElementById('viewTaskModal'));
                     modal.show();
                 })
                 .catch(err => {
-                    alert(err.message);
+                    alert("Ошибка: " + err.message);
                 });
         }
 
@@ -671,5 +685,118 @@
                     alert('Произошла ошибка при назначении исполнителя: ' + error.message);
                 });
         });
+
+        let currentModalTaskId = null;
+
+        function openTaskModal(task) {
+            currentModalTaskId = task.id;
+
+            // Заполняем данные задачи
+            document.getElementById('viewTaskTitle').textContent = task.title;
+            document.getElementById('viewTaskDescription').textContent = task.description;
+            document.getElementById('viewTaskStatus').textContent = task.status;
+            document.getElementById('viewTaskDueDate').textContent = task.dueDate ?? '—';
+
+            // Загружаем комментарии
+            loadModalComments(task.id);
+
+            // Показываем модалку
+            new bootstrap.Modal(document.getElementById('viewTaskModal')).show();
+        }
+
+        document.getElementById('modalCommentForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const content = document.getElementById('modalCommentInput').value.trim();
+            if (!content || !currentTaskId) {
+                alert('Введите текст комментария');
+                return;
+            }
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const formData = new FormData();
+                formData.append('taskId', currentTaskId);
+                formData.append('content', content);
+
+                // ✅ Используем /api/Comments/Add
+                const response = await fetch('/api/Comments/Add', {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': token
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    document.getElementById('modalCommentInput').value = '';
+                    await loadModalComments(currentTaskId);
+                } else {
+                    const error = await response.text();
+                    alert(`Ошибка: ${error}`);
+                }
+            } catch (err) {
+                console.error('Ошибка при отправке комментария:', err);
+                alert('Произошла ошибка при отправке комментария');
+            }
+        });
+
+        function loadModalComments(taskId) {
+            const commentsList = document.getElementById("modalCommentsList");
+            commentsList.innerHTML = '<p class="text-muted">Загрузка комментариев...</p>';
+
+            fetch(`/api/Comments/List?taskId=${taskId}`)
+                .then(response => response.json())
+                .then(comments => {
+                    if (!comments || !comments.length) {
+                        commentsList.innerHTML = '<p class="text-muted">Комментариев пока нет.</p>';
+                        return;
+                    }
+
+                    commentsList.innerHTML = '';
+                    comments.forEach(comment => {
+                        const commentHtml = `
+                                                <div class="comment-container d-flex mb-3 p-3 rounded bg-light hover-shadow">
+                                                    <img src="${comment.avatarUrl || '/images/default-avatar.png'}"
+                                                         class="avatar rounded-circle me-3 shadow-sm"
+                                                         width="48" height="48"
+                                                         onerror="this.src='/images/default-avatar.png'">
+                                                    <div class="flex-grow-1">
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <div>
+                                                                <strong class="me-2">${comment.userName}</strong>
+                                                                <small class="text-muted">${new Date(comment.createdAt).toLocaleString()}</small>
+                                                            </div>
+                                                            ${comment.isMine ? `
+                                                            <a href="#" class="text-danger text-decoration-none delete-comment"
+                                                               data-id="${comment.id}">
+                                                                Удалить
+                                                            </a>` : ''}
+                                                        </div>
+                                                        <div class="comment-text ps-2">${comment.content}</div>
+                                                    </div>
+                                                </div>`;
+                        commentsList.insertAdjacentHTML('beforeend', commentHtml);
+                    });
+
+                    // Удаление комментария
+                    commentsList.querySelectorAll('.delete-comment').forEach(btn => {
+                        btn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            const commentId = btn.dataset.id;
+                            fetch('/Comments/Delete', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ commentId })
+                            }).then(res => {
+                                if (res.ok) loadModalComments(taskId);
+                            });
+                        });
+                    });
+                })
+                .catch(() => {
+                    commentsList.innerHTML = `<p class="text-danger">Ошибка при загрузке комментариев</p>`;
+                });
+        }
     </script>
 }
