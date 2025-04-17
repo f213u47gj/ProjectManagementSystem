@@ -743,60 +743,100 @@
 
         function loadModalComments(taskId) {
             const commentsList = document.getElementById("modalCommentsList");
-            commentsList.innerHTML = '<p class="text-muted">Загрузка комментариев...</p>';
+            commentsList.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Загрузка...</span></div></div>';
 
             fetch(`/api/Comments/List?taskId=${taskId}`)
-                .then(response => response.json())
+                .then(async response => {
+                    if (!response.ok) {
+                        const error = await response.json().catch(() => null);
+                        throw new Error(error?.message || 'Не удалось загрузить комментарии');
+                    }
+                    return response.json();
+                })
                 .then(comments => {
                     if (!comments || !comments.length) {
-                        commentsList.innerHTML = '<p class="text-muted">Комментариев пока нет.</p>';
+                        commentsList.innerHTML = '<p class="text-muted">Комментариев пока нет</p>';
                         return;
                     }
 
-                    commentsList.innerHTML = '';
-                    comments.forEach(comment => {
-                        const commentHtml = `
-                                                <div class="comment-container d-flex mb-3 p-3 rounded bg-light hover-shadow">
-                                                    <img src="${comment.avatarUrl || '/images/default-avatar.png'}"
-                                                         class="avatar rounded-circle me-3 shadow-sm"
-                                                         width="48" height="48"
-                                                         onerror="this.src='/images/default-avatar.png'">
-                                                    <div class="flex-grow-1">
-                                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                                            <div>
-                                                                <strong class="me-2">${comment.userName}</strong>
-                                                                <small class="text-muted">${new Date(comment.createdAt).toLocaleString()}</small>
-                                                            </div>
-                                                            ${comment.isMine ? `
-                                                            <a href="#" class="text-danger text-decoration-none delete-comment"
-                                                               data-id="${comment.id}">
-                                                                Удалить
-                                                            </a>` : ''}
-                                                        </div>
-                                                        <div class="comment-text ps-2">${comment.content}</div>
-                                                    </div>
-                                                </div>`;
-                        commentsList.insertAdjacentHTML('beforeend', commentHtml);
-                    });
+                    commentsList.innerHTML = comments.map(comment => `
+                        <div class="comment-container d-flex mb-3 p-3 rounded bg-light">
+                            <img src="${comment.avatarUrl || '/images/default-avatar.png'}"
+                                 class="avatar rounded-circle me-3 shadow-sm"
+                                 width="48" height="48"
+                                 onerror="this.src='/images/default-avatar.png'">
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <strong class="me-2">${comment.userName || 'Пользователь'}</strong>
+                                        <small class="text-muted">${new Date(comment.createdAt).toLocaleString('ru-RU')}</small>
+                                    </div>
+                                    ${comment.canDelete ? `
+                                    <button class="btn btn-sm btn-outline-danger delete-comment"
+                                            data-id="${comment.id}"
+                                            title="Удалить комментарий">
+                                        Удалить
+                                    </button>` : ''}
+                                </div>
+                                <div class="comment-text ps-2">${comment.content || ''}</div>
+                            </div>
+                        </div>
+                    `).join('');
 
-                    // Удаление комментария
-                    commentsList.querySelectorAll('.delete-comment').forEach(btn => {
-                        btn.addEventListener('click', function (e) {
-                            e.preventDefault();
-                            const commentId = btn.dataset.id;
-                            fetch('/Comments/Delete', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ commentId })
-                            }).then(res => {
-                                if (res.ok) loadModalComments(taskId);
-                            });
-                        });
+                    document.querySelectorAll('.delete-comment').forEach(btn => {
+                        btn.addEventListener('click', handleDeleteComment);
                     });
                 })
-                .catch(() => {
-                    commentsList.innerHTML = `<p class="text-danger">Ошибка при загрузке комментариев</p>`;
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    commentsList.innerHTML = `
+                    <div class="alert alert-danger">
+                        ${error.message || 'Произошла ошибка при загрузке комментариев'}
+                        <button onclick="loadModalComments(${taskId})" class="btn btn-sm btn-link">Попробовать снова</button>
+                    </div>`;
                 });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('ru-RU');
+        }
+
+        async function handleDeleteComment(e) {
+            e.preventDefault();
+            const btn = e.currentTarget;
+            const commentId = btn.dataset.id;
+            const taskId = currentModalTaskId;
+
+            if (!confirm('Вы уверены, что хотите удалить комментарий?')) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const response = await fetch('/api/Comments/Delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify(commentId)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json().catch(() => null);
+                    throw new Error(error?.message || 'Не удалось удалить комментарий');
+                }
+
+                await loadModalComments(taskId);
+            } catch (error) {
+                console.error('Ошибка удаления:', error);
+                alert(error.message || 'Произошла ошибка при удалении');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Удалить';
+            }
         }
     </script>
 }

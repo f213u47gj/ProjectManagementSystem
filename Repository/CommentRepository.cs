@@ -20,13 +20,20 @@ namespace ProjectManagementSystem.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int commentId)
+        public async Task<bool> DeleteAsync(int commentId)
         {
-            var comment = await _context.Comments.FindAsync(commentId);
-            if (comment != null)
+            try
             {
+                var comment = await _context.Comments.FindAsync(commentId);
+                if (comment == null) return false;
+
                 _context.Comments.Remove(comment);
                 await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -45,5 +52,15 @@ namespace ProjectManagementSystem.Repositories
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Comment>> GetByTaskIdWithUserAsync(int taskId)
+        {
+            return await _context.Comments
+                .Include(c => c.User) // Подгружаем данные пользователя
+                .Where(c => c.ProjectTaskId == taskId)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+        }
+
     }
 }

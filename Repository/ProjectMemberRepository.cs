@@ -94,5 +94,22 @@ namespace ProjectManagementSystem.Repositories
                 .Select(pm => pm.Role)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<bool> IsUserInProjectAsync(int projectId, string userId)
+        {
+            return await _context.Projects.AnyAsync(p => p.Id == projectId && p.OwnerId == userId) ||
+                   await _context.ProjectMembers.AnyAsync(m => m.ProjectId == projectId && m.UserId == userId);
+        }
+
+        public async Task<string?> GetUserRoleInProjectAsync(int projectId, string userId)
+        {
+            if (await _context.Projects.AnyAsync(p => p.Id == projectId && p.OwnerId == userId))
+                return "Owner";
+
+            var member = await _context.ProjectMembers
+                .FirstOrDefaultAsync(m => m.ProjectId == projectId && m.UserId == userId);
+
+            return member?.Role;
+        }
     }
 }
