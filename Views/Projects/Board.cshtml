@@ -272,7 +272,7 @@
         function openCreateModal(event) {
             if (event) {
                 const target = event.target.closest('.task-card');
-                if (target) return; // Не открывать модалку, если ПКМ по задаче
+                if (target) return;
                 event.preventDefault();
             }
 
@@ -321,12 +321,10 @@
 
         function assignUserToTask() {
             alert("Назначение исполнителя задаче ID: " + currentTaskId);
-            // Тут можно вызвать модалку или открыть другую страницу
         }
 
         function editTask() {
             alert("Редактирование задачи ID: " + currentTaskId);
-            // Тут можно открыть модалку редактирования
         }
 
         function editTask() {
@@ -356,7 +354,6 @@
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
 
-            // Добавим ProjectId вручную
             data.ProjectId = @Model.Project.Id;
 
             fetch('/ProjectTasks/Edit', {
@@ -379,7 +376,6 @@
                 return;
             }
 
-            // Покажем название задачи в модалке
             const taskCard = document.querySelector(`.task-card[data-task-id='${currentTaskId}']`);
             const taskTitle = taskCard?.querySelector('.card-title')?.textContent ?? "(без названия)";
             document.getElementById("deleteTaskTitle").textContent = taskTitle;
@@ -415,7 +411,7 @@
                         return;
                     }
 
-                    location.reload(); // или перерисовка
+                    location.reload();
             });
 
         }
@@ -427,16 +423,13 @@
                     return response.json();
                 })
                 .then(task => {
-                    // Заполняем данные задачи
                     document.getElementById("viewTaskTitle").textContent = task.title;
                     document.getElementById("viewTaskDescription").textContent = task.description?.trim() || "(Нет описания)";
                     document.getElementById("viewTaskStatus").textContent = getLocalizedStatus(task.status);
                     document.getElementById("viewTaskDueDate").textContent = task.dueDate?.substring(0, 10) || "(Без срока)";
 
-                    // Загружаем комментарии
                     loadModalComments(task.id);
 
-                    // Показываем модальное окно
                     const modal = new bootstrap.Modal(document.getElementById('viewTaskModal'));
                     modal.show();
                 })
@@ -454,7 +447,6 @@
             }
         }
 
-        // Назначение исполнителей
         let currentTaskIdForAssignment = null;
 
         function assignUserToTask() {
@@ -525,7 +517,6 @@
                         const userInfo = document.createElement('div');
                         userInfo.className = 'd-flex align-items-center';
 
-                        // Аватар
                         const img = document.createElement('img');
                         img.src = assignee.avatarUrl || '/images/default-avatar.png';
                         img.className = 'rounded-circle me-2';
@@ -533,14 +524,12 @@
                         img.height = 24;
                         img.onerror = function () { this.src = '/images/default-avatar.png'; };
 
-                        // Имя пользователя
                         const nameSpan = document.createElement('span');
                         nameSpan.textContent = assignee.userName || `User ${assignee.id}`;
 
                         userInfo.appendChild(img);
                         userInfo.appendChild(nameSpan);
 
-                        // Кнопка удаления
                         const removeBtn = document.createElement('button');
                         removeBtn.className = 'btn btn-sm btn-outline-danger';
                         removeBtn.innerHTML = '&times;';
@@ -579,11 +568,9 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        // Обновляем интерфейс
                         loadCurrentAssignees();
                         loadAvailableMembers();
 
-                        // Обновляем исполнителей на карточке задачи
                         updateTaskCardAssignees(currentTaskIdForAssignment);
                     } else {
                         alert(data.message || 'Ошибка при удалении исполнителя');
@@ -663,17 +650,13 @@
                     console.log("Assignment response:", data);
 
                     if (data.success) {
-                        // Обновляем модальное окно
                         loadCurrentAssignees();
                         loadAvailableMembers();
 
-                        // Обновляем карточку задачи
                         updateTaskCardAssignees(currentTaskIdForAssignment);
 
-                        // Очищаем выбор
                         document.getElementById('assigneeSelect').value = '';
 
-                        // Закрываем модальное окно
                         const modal = bootstrap.Modal.getInstance(document.getElementById('assignAssigneeModal'));
                         modal.hide();
                     } else {
@@ -691,16 +674,13 @@
         function openTaskModal(task) {
             currentModalTaskId = task.id;
 
-            // Заполняем данные задачи
             document.getElementById('viewTaskTitle').textContent = task.title;
             document.getElementById('viewTaskDescription').textContent = task.description;
             document.getElementById('viewTaskStatus').textContent = task.status;
             document.getElementById('viewTaskDueDate').textContent = task.dueDate ?? '—';
 
-            // Загружаем комментарии
             loadModalComments(task.id);
 
-            // Показываем модалку
             new bootstrap.Modal(document.getElementById('viewTaskModal')).show();
         }
 
@@ -719,7 +699,6 @@
                 formData.append('taskId', currentTaskId);
                 formData.append('content', content);
 
-                // ✅ Используем /api/Comments/Add
                 const response = await fetch('/api/Comments/Add', {
                     method: 'POST',
                     headers: {
@@ -797,15 +776,10 @@
                 });
         }
 
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleString('ru-RU');
-        }
-
         async function handleDeleteComment(e) {
             e.preventDefault();
             const btn = e.currentTarget;
-            const commentId = btn.dataset.id;
+            const commentId = parseInt(btn.dataset.id);
             const taskId = currentModalTaskId;
 
             if (!confirm('Вы уверены, что хотите удалить комментарий?')) return;
@@ -815,13 +789,12 @@
 
             try {
                 const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-                const response = await fetch('/api/Comments/Delete', {
+                const response = await fetch(`/api/Comments/Delete?commentId=${commentId}`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': token
-                    },
-                    body: JSON.stringify(commentId)
+                        'RequestVerificationToken': token,
+                        'Cache-Control': 'no-cache'
+                    }
                 });
 
                 if (!response.ok) {
@@ -829,14 +802,40 @@
                     throw new Error(error?.message || 'Не удалось удалить комментарий');
                 }
 
-                await loadModalComments(taskId);
+                const commentElement = btn.closest('.comment-container');
+                commentElement.style.opacity = '0';
+                setTimeout(() => {
+                    commentElement.remove();
+                    updateEmptyState();
+                }, 300);
+
             } catch (error) {
                 console.error('Ошибка удаления:', error);
-                alert(error.message || 'Произошла ошибка при удалении');
+                showToast(error.message || 'Произошла ошибка при удалении', 'error');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = 'Удалить';
             }
+        }
+
+        function updateEmptyState() {
+            const commentsList = document.getElementById("modalCommentsList");
+            if (commentsList.children.length === 0) {
+                commentsList.innerHTML = '<p class="text-muted">Комментариев пока нет</p>';
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast show align-items-center text-white bg-${type}`;
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
     </script>
 }

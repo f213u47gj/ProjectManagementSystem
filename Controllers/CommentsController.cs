@@ -51,15 +51,12 @@ namespace ProjectManagementSystem.Controllers
 
         [HttpPost("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete([FromBody] int commentId)
+        public async Task<IActionResult> Delete(int commentId) // Изменили на параметр query
         {
             try
             {
                 var comment = await _commentRepository.GetByIdAsync(commentId);
-                if (comment == null)
-                {
-                    return NotFound(new { message = "Комментарий не найден" });
-                }
+                if (comment == null) return Ok(); // Возвращаем успех, если комментарий уже удален
 
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var task = await _taskRepository.GetTaskByIdAsync(comment.ProjectTaskId);
@@ -68,13 +65,18 @@ namespace ProjectManagementSystem.Controllers
                 if (!await CheckDeletePermission(comment, userId, project))
                     return Forbid();
 
-                bool success = await _commentRepository.DeleteAsync(commentId);
-                return success ? Ok() : StatusCode(500);
+                await _commentRepository.DeleteAsync(commentId);
+                return Ok();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Внутренняя ошибка сервера" });
+                return StatusCode(500, "Внутренняя ошибка сервера");
             }
+        }
+
+        public class DeleteCommentRequest
+        {
+            public int CommentId { get; set; }
         }
 
         [HttpGet("List")]
