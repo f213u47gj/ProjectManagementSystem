@@ -107,7 +107,18 @@ namespace ProjectManagementSystem.Repositories
 
         public async Task DeleteProjectAsync(Project project)
         {
+            var members = await _context.ProjectMembers
+                .Where(pm => pm.ProjectId == project.Id)
+                .ToListAsync();
+            _context.ProjectMembers.RemoveRange(members);
+
+            var tasks = await _context.ProjectTasks
+                .Where(t => t.ProjectId == project.Id)
+                .ToListAsync();
+            _context.ProjectTasks.RemoveRange(tasks);
+
             _context.Projects.Remove(project);
+
             await _context.SaveChangesAsync();
         }
 
