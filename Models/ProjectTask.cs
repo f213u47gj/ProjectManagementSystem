@@ -22,7 +22,6 @@ namespace ProjectManagementSystem.Models
         public DateTime? DueDate { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Навигационные свойства
         public ICollection<TaskAssignee> Assignees { get; set; } = new List<TaskAssignee>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<TaskHistory> History { get; set; } = new List<TaskHistory>();

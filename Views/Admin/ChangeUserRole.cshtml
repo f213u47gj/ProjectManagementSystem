@@ -1,0 +1,12 @@
+﻿@model ProjectManagementSystem.ViewModels.forAdmin.ChangeUserRoleViewModel
+
+<h2>Change Role for @Model.User.UserName</h2>
+<form asp-action="ChangeUserRole" method="post">
+    <input type="hidden" asp-for="User.Id" />
+    <div class="form-group">
+        <label asp-for="SelectedRole">New Role</label>
+        <select asp-for="SelectedRole" asp-items="Model.AvailableRoles" class="form-control"></select>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+<a asp-action="Index">Cancel</a>

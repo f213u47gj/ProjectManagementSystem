@@ -18,7 +18,6 @@ namespace ProjectManagementSystem.Repositories
             _userManager = userManager;
         }
 
-        // Получить проекты текущего пользователя (владелец или участник)
         public async Task<IEnumerable<Project>> GetUserProjectsAsync(ClaimsPrincipal user)
         {
             var currentUser = await _userManager.GetUserAsync(user);
@@ -28,7 +27,6 @@ namespace ProjectManagementSystem.Repositories
                 .ToListAsync();
         }
 
-        // Получить проект по ID
         public async Task<Project?> GetProjectByIdAsync(int id)
         {
             return await _context.Projects
@@ -37,7 +35,6 @@ namespace ProjectManagementSystem.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        // Получить проект с доской и всем необходимым
         public async Task<Project?> GetProjectWithBoardAsync(int id)
         {
             return await _context.Projects
@@ -52,7 +49,6 @@ namespace ProjectManagementSystem.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        // Создать проект
         public async Task<bool> CreateProjectAsync(Project project, ClaimsPrincipal user)
         {
             var currentUser = await _userManager.GetUserAsync(user);
@@ -113,6 +109,23 @@ namespace ProjectManagementSystem.Repositories
         {
             _context.Projects.Remove(project);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Project>> GetAllProjectsAsync()
+        {
+            return await _context.Projects
+                .Include(p => p.Owner)
+                .Include(p => p.Members)
+                    .ThenInclude(m => m.User)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<ProjectMember>> GetProjectsByUserIdAsync(string userId)
+        {
+            return await _context.ProjectMembers
+                .Include(pm => pm.Project)
+                .Where(pm => pm.UserId == userId)
+                .ToListAsync();
         }
     }
 }

@@ -56,7 +56,7 @@ namespace ProjectManagementSystem.Repositories
         public async Task<IEnumerable<Comment>> GetByTaskIdWithUserAsync(int taskId)
         {
             return await _context.Comments
-                .Include(c => c.User) // Подгружаем данные пользователя
+                .Include(c => c.User)
                 .Where(c => c.ProjectTaskId == taskId)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();

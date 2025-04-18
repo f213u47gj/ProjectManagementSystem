@@ -22,7 +22,6 @@ namespace ProjectManagementSystem.Repositories
 
         public async Task<bool> AddAssigneeAsync(int taskId, string userId)
         {
-            // Проверяем, что назначение не существует
             if (await _context.TaskAssignees.AnyAsync(ta => ta.ProjectTaskId == taskId && ta.UserId == userId))
                 return false;
 

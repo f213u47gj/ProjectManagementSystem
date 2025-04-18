@@ -1,0 +1,39 @@
+﻿@* Views/Admin/Index.cshtml *@
+@{
+    ViewData["Title"] = "Панель администратора";
+}
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4">Панель администратора</h1>
+        <p class="lead">Управление системой проектов</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card admin-nav-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="admin-nav-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Пользователи</h3>
+                    <p>Управление учетными записями пользователей</p>
+                    <a asp-action="Users" class="btn btn-primary btn-lg">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card admin-nav-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="admin-nav-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <h3>Проекты</h3>
+                    <p>Управление проектами и их участниками</p>
+                    <a asp-action="Projects" class="btn btn-primary btn-lg">Перейти</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

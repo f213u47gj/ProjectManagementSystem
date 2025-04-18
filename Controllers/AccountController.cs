@@ -51,7 +51,6 @@ namespace ProjectManagementSystem.Controllers
             return View(model);
         }
 
-        // 🚪 Logout
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
@@ -60,7 +59,6 @@ namespace ProjectManagementSystem.Controllers
             return RedirectToAction("Login", "Account");
         }
 
-        // 📝 Registration
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Register()

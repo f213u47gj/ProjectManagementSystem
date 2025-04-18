@@ -11,7 +11,6 @@ namespace ProjectManagementSystem.Models
         public string? AvatarUrl { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Навигационные свойства
         public ICollection<ProjectMember> Projects { get; set; } = new List<ProjectMember>();
         public ICollection<TaskAssignee> AssignedTasks { get; set; } = new List<TaskAssignee>();
     }

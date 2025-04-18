@@ -51,12 +51,12 @@ namespace ProjectManagementSystem.Controllers
 
         [HttpPost("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int commentId) // Изменили на параметр query
+        public async Task<IActionResult> Delete(int commentId)
         {
             try
             {
                 var comment = await _commentRepository.GetByIdAsync(commentId);
-                if (comment == null) return Ok(); // Возвращаем успех, если комментарий уже удален
+                if (comment == null) return Ok();
 
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var task = await _taskRepository.GetTaskByIdAsync(comment.ProjectTaskId);
@@ -87,25 +87,21 @@ namespace ProjectManagementSystem.Controllers
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (userId == null) return Unauthorized();
 
-                // Получаем задачу и проверяем доступ
                 var task = await _taskRepository.GetTaskByIdAsync(taskId);
                 if (task == null) return NotFound("Задача не найдена");
 
                 var project = await _projectRepository.GetProjectByIdAsync(task.ProjectId);
                 if (project == null) return NotFound("Проект не найден");
 
-                // Проверяем, является ли пользователь участником проекта
                 var isMember = project.OwnerId == userId ||
                               await _memberRepository.IsUserInProjectAsync(project.Id, userId);
                 if (!isMember) return Forbid();
 
-                // Получаем комментарии с включением данных пользователя
                 var comments = await _commentRepository.GetByTaskIdWithUserAsync(taskId);
 
                 var result = new List<object>();
                 foreach (var comment in comments)
                 {
-                    // Проверяем права на удаление для каждого комментария
                     var canDelete = await CheckDeletePermission(comment, userId, project);
 
                     result.Add(new
@@ -131,13 +127,10 @@ namespace ProjectManagementSystem.Controllers
 
         private async Task<bool> CheckDeletePermission(Comment comment, string currentUserId, Project project)
         {
-            // Владелец может удалять любые комментарии
             if (project.OwnerId == currentUserId) return true;
 
-            // Автор может удалять свои комментарии
             if (comment.UserId == currentUserId) return true;
 
-            // Для менеджеров
             var currentUserRole = await _memberRepository.GetUserRoleInProjectAsync(project.Id, currentUserId);
             if (currentUserRole == "Manager")
             {

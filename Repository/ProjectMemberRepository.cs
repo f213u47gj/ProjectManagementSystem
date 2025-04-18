@@ -33,7 +33,7 @@ namespace ProjectManagementSystem.Repositories
             var exists = await _context.ProjectMembers
                 .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == user.Id);
 
-            if (exists) return true; // уже участник
+            if (exists) return true;
 
             var newMember = new ProjectMember
             {

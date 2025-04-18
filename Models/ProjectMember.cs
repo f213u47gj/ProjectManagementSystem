@@ -17,7 +17,7 @@ namespace ProjectManagementSystem.Models
         public Project Project { get; set; } = null!;
 
         [Required]
-        public string Role { get; set; } = "member"; // owner, admin, member
+        public string Role { get; set; } = "member";
 
         public DateTime AddedAt { get; set; } = DateTime.UtcNow;
     }

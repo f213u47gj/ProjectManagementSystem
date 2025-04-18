@@ -128,7 +128,6 @@ namespace ProjectManagementSystem.Controllers
             {
                 var assignees = await _taskAssigneeRepo.GetAssigneesForTaskAsync(taskId);
 
-                // Преобразуем данные в правильный формат
                 var result = assignees.Select(a => new
                 {
                     Id = a.Id,
@@ -153,15 +152,12 @@ namespace ProjectManagementSystem.Controllers
                 if (task == null)
                     return Json(new { success = false, message = "Задача не найдена" });
 
-                // Получаем всех участников проекта
                 var allMembers = await _projectMemberRepo.GetProjectMembersAsync(task.ProjectId);
 
-                // Получаем уже назначенных исполнителей
                 var assignedUserIds = (await _taskAssigneeRepo.GetAssigneesForTaskAsync(taskId))
                     .Select(a => a.Id)
                     .ToList();
 
-                // Фильтруем участников
                 var availableMembers = allMembers
                     .Where(m => !assignedUserIds.Contains(m.UserId))
                     .Select(m => new

@@ -1,0 +1,166 @@
+﻿@model IEnumerable<ProjectManagementSystem.ViewModels.forAdmin.ProjectViewModel>
+
+@{
+    ViewData["Title"] = "Управление проектами";
+}
+
+<div class="container-fluid py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Управление проектами</h2>
+                <a asp-action="Index" class="btn btn-light btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i> Назад
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="5%">ID</th>
+                            <th width="20%">Название</th>
+                            <th width="25%">Описание</th>
+                            <th width="15%">Дата создания</th>
+                            <th width="15%">Владелец</th>
+                            <th width="20%">Участники</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var project in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold text-muted">#@project.Id</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm me-2">
+                                            <div class="avatar-title bg-light rounded-circle text-primary">
+                                                <i class="fas fa-project-diagram"></i>
+                                            </div>
+                                        </div>
+                                        <span class="fw-bold">@project.Name</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(project.Description))
+                                    {
+                                        <span class="text-truncate d-inline-block" style="max-width: 300px;"
+                                              data-bs-toggle="tooltip" title="@project.Description">
+                                            @project.Description
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Нет описания</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">
+                                        <i class="far fa-calendar-alt me-1"></i>
+                                        @project.CreatedAt.ToString("dd.MM.yyyy")
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm me-2">
+                                            <div class="avatar-title bg-light rounded-circle text-success">
+                                                @(project.OwnerName != null ? project.OwnerName[0].ToString().ToUpper() : "")
+                                            </div>
+                                        </div>
+                                        <span>@project.OwnerName</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (project.Members.Any())
+                                    {
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                                    type="button"
+                                                    data-bs-toggle="dropdown"
+                                                    aria-expanded="false">
+                                                @project.Members.Count() участников
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                @foreach (var member in project.Members)
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item" href="#">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <span>@member.UserName</span>
+                                                                <span class="badge @GetRoleBadgeClass(member.Role)">
+                                                                    @member.Role
+                                                                </span>
+                                                            </div>
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Нет участников</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .avatar-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+
+    .dropdown-menu {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+    .text-truncate {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+    });
+</script>
+
+@functions {
+    string GetRoleBadgeClass(string role)
+    {
+        return role switch
+        {
+            "Admin" => "bg-danger",
+            "Manager" => "bg-warning text-dark",
+            _ => "bg-secondary"
+        };
+    }
+}

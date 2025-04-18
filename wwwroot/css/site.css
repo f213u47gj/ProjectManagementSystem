@@ -50,3 +50,20 @@ body {
     object-fit: cover;
     border-radius: 50%;
 }
+
+.admin-nav-card {
+    border-radius: 10px;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+    .admin-nav-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+.admin-nav-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #4e73df;
+}

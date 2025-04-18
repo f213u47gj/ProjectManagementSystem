@@ -19,7 +19,6 @@ namespace ProjectManagementSystem.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Навигационные свойства
         public ICollection<ProjectMember> Members { get; set; } = new List<ProjectMember>();
         public ICollection<ProjectTask> ProjectTasks { get; set; } = new List<ProjectTask>();
     }

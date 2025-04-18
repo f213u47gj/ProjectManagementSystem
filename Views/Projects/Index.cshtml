@@ -46,7 +46,6 @@
 
                         @if (project.OwnerId == currentUserId)
                         {
-                            <!-- Контекстное меню -->
                             <div id="context-menu-@project.Id" class="context-menu position-absolute bg-white border rounded shadow-sm"
                                  style="display:none; z-index: 1000; min-width: 160px;">
                                 <button onclick="confirmDeleteProject('@project.Name', '@project.Id')">Удалить</button>
@@ -59,7 +58,6 @@
     }
 </div>
 
-<!-- Модалка удаления -->
 <div id="deleteProjectModal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow">

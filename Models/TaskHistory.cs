@@ -16,7 +16,7 @@ namespace ProjectManagementSystem.Models
         public string UserId { get; set; } = string.Empty;
         public User User { get; set; } = null!;
 
-        public string ChangeType { get; set; } = string.Empty; // "status_changed", "assignee_added", etc.
+        public string ChangeType { get; set; } = string.Empty;
         public string OldValue { get; set; } = string.Empty;
         public string NewValue { get; set; } = string.Empty;
 

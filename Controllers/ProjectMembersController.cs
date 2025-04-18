@@ -118,12 +118,10 @@ namespace ProjectManagementSystem.Controllers
                     avatarUrl = m.User.AvatarUrl
                 }).ToList();
 
-                Console.WriteLine($"Returning {result.Count} members for project {projectId}");
                 return Json(result);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error getting members: {ex}");
                 return StatusCode(500, new { error = ex.Message });
             }
         }

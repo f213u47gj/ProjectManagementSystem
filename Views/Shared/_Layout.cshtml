@@ -9,10 +9,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ProjectManagementSystem</title>
+    <title>@ViewData["Title"] - WorkNest</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProjectManagementSystem.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
@@ -27,12 +28,17 @@
                 {
                     var currentUser = await UserManager.GetUserAsync(User);
                     var avatarUrl = currentUser?.AvatarUrl ?? "/images/default-avatar.png";
+                    var isAdmin = await UserManager.IsInRoleAsync(currentUser, "Admin");
 
                     <div class="dropdown ms-auto">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="@avatarUrl" title="@User.Identity.Name" alt="Avatar" class="user-avatar" />
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
+                            @if (isAdmin)
+                            {
+                                <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index">Админ-панель</a></li>
+                            }
                             <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">Профиль</a></li>
                             <li>
                                 <form asp-controller="Account" asp-action="Logout" method="post">

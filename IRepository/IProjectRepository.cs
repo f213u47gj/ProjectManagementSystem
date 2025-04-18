@@ -12,6 +12,7 @@ namespace ProjectManagementSystem.IRepositories
         Task<bool> AddMemberByEmailAsync(int projectId, string email);
         Task UpdateProjectAsync(Project project);
         Task DeleteProjectAsync(Project project);
-
+        Task<IEnumerable<Project>> GetAllProjectsAsync();
+        Task<IEnumerable<ProjectMember>> GetProjectsByUserIdAsync(string userId);
     }
 }
