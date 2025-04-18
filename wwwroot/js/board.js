@@ -1,4 +1,4 @@
-﻿let currentTaskId = null;
+﻿/*let currentTaskId = null;
 
 function openCreateModal(event) {
     if (event) {
@@ -567,4 +567,4 @@ function showToast(message, type = 'success') {
             `;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
-}
+}*/

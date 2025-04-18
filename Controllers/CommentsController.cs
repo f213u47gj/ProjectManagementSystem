@@ -135,7 +135,7 @@ namespace ProjectManagementSystem.Controllers
             if (currentUserRole == "Manager")
             {
                 var commentAuthorRole = await _memberRepository.GetUserRoleInProjectAsync(project.Id, comment.UserId);
-                return commentAuthorRole == "Member"; // Менеджер может удалять комментарии участников
+                return commentAuthorRole == "Member";
             }
 
             return false;

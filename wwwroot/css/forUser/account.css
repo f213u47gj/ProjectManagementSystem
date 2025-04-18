@@ -1,5 +1,4 @@
-﻿/* === Общие стили для login и registration === */
-body {
+﻿body {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -39,7 +38,6 @@ body {
     border-radius: 1px;
 }
 
-/* === Поля ввода === */
 input[type="text"],
 input[type="password"],
 input[type="email"],
@@ -68,7 +66,6 @@ input:focus {
     margin-bottom: 5px;
 }
 
-/* === Запомнить меня (только login) === */
 .rememberme {
     display: flex;
     align-items: center;
@@ -83,7 +80,6 @@ input:focus {
         height: 16px;
     }
 
-/* === Кнопки === */
 .sunbit-but {
     display: flex;
     flex-direction: column;
