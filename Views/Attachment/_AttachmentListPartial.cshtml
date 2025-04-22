@@ -1,0 +1,105 @@
+﻿@* @model IEnumerable<Attachment>
+@{
+    var canDelete = ViewBag.CanDeleteAttachments ?? false;
+    var currentUserId = ViewBag.CurrentUserId;
+}
+
+<div class="attachments-list">
+    @if (Model.Any())
+    {
+        foreach (var attachment in Model)
+        {
+            var fileName = Path.GetFileName(attachment.FileUrl);
+            <div class="attachment-item" data-id="@attachment.Id">
+                <div class="attachment-info">
+                    <a href="@attachment.FileUrl" target="_blank" class="attachment-link">
+                        <i class="fas @GetFileIcon(attachment.FileUrl)"></i>
+                        <span class="attachment-name">@fileName</span>
+                    </a>
+                    <small class="attachment-meta">
+                        @attachment.UploadedBy.UserName -
+                        @attachment.UploadedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                    </small>
+                </div>
+                @if (canDelete || attachment.UploadedById == currentUserId)
+                {
+                    <button class="btn btn-sm btn-outline-danger delete-attachment">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div class="no-attachments alert alert-info">Нет вложений</div>
+    }
+</div>
+
+@functions {
+    string GetFileIcon(string fileUrl)
+    {
+        var extension = Path.GetExtension(fileUrl).ToLower();
+        return extension switch
+        {
+            ".pdf" => "fa-file-pdf",
+            ".docx" => "fa-file-word",
+            ".xlsx" => "fa-file-excel",
+            ".jpg" or ".png" or ".jpeg" => "fa-file-image",
+            ".txt" => "fa-file-alt",
+            _ => "fa-file"
+        };
+    }
+}
+
+<style>
+    .attachments-list {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    .attachment-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1.25rem;
+        margin-bottom: 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 0.25rem;
+        transition: background-color 0.2s;
+    }
+
+        .attachment-item:hover {
+            background-color: #e9ecef;
+        }
+
+    .attachment-info {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .attachment-link {
+        color: #212529;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .attachment-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .attachment-meta {
+        color: #6c757d;
+        font-size: 0.8rem;
+        margin-left: 1.5rem;
+    }
+
+    .no-attachments {
+        text-align: center;
+        margin: 1rem 0;
+    }
+</style> *@

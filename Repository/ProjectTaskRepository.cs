@@ -58,7 +58,18 @@ namespace ProjectManagementSystem.Repositories
             var task = await _context.ProjectTasks.FindAsync(taskId);
             if (task != null)
             {
+                var comments = await _context.Comments
+                    .Where(c => c.ProjectTaskId == taskId)
+                    .ToListAsync();
+                _context.Comments.RemoveRange(comments);
+
+                var assignees = await _context.TaskAssignees
+                    .Where(a => a.ProjectTaskId == taskId)
+                    .ToListAsync();
+                _context.TaskAssignees.RemoveRange(assignees);
+
                 _context.ProjectTasks.Remove(task);
+
                 await _context.SaveChangesAsync();
             }
         }

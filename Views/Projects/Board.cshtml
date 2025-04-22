@@ -246,6 +246,25 @@
     </div>
 </div>
 
+<div class="modal fade" id="attachmentsModal" tabindex="-1" aria-labelledby="attachmentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Вложения задачи</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <div id="attachmentsList" class="mb-3"></div>
+
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <input type="file" name="file" class="form-control mb-2" required>
+                    <button type="submit" class="btn btn-primary">Загрузить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="taskContextMenu" class="position-absolute bg-white border rounded shadow-sm"
      style="display: none; z-index: 1000; min-width: 200px;">
     <ul class="list-unstyled mb-0">
@@ -254,6 +273,7 @@
             <li><button class="dropdown-item" onclick="viewTask()">Просмотр задачи</button></li>
             <li><button class="dropdown-item" onclick="assignUserToTask()">Назначить исполнителя</button></li>
             <li><button class="dropdown-item" onclick="editTask()">Редактировать задачу</button></li>
+            <li><button class="dropdown-item" onclick="openAttachmentsModal()">Вложения</button></li>
             <li><button class="dropdown-item text-danger" onclick="confirmDeleteTask()">Удалить задачу</button></li>
         }
         else
@@ -266,6 +286,18 @@
 @section Scripts {
     <script>
         let currentTaskId = null;
+
+        function showTaskContextMenu(event, taskId) {
+            event.preventDefault();
+            currentTaskId = taskId;
+
+            const menu = document.getElementById("taskContextMenu");
+            menu.style.left = `${event.pageX}px`;
+            menu.style.top = `${event.pageY}px`;
+            menu.style.display = "block";
+
+            document.addEventListener("click", hideTaskContextMenu);
+        }
 
         function openCreateModal(event) {
             if (event) {
@@ -299,18 +331,6 @@
                 alert(err.message);
             });
         });
-
-        function showTaskContextMenu(event, taskId) {
-            event.preventDefault();
-            currentTaskId = taskId;
-
-            const menu = document.getElementById("taskContextMenu");
-            menu.style.left = `${event.pageX}px`;
-            menu.style.top = `${event.pageY}px`;
-            menu.style.display = "block";
-
-            document.addEventListener("click", hideTaskContextMenu);
-        }
 
         function hideTaskContextMenu() {
             document.getElementById("taskContextMenu").style.display = "none";
@@ -834,6 +854,74 @@
             `;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
+        }
+
+        function openAttachmentsModal() {
+            if (!currentTaskId) return;
+
+            fetch(`/Attachments/GetAttachments?taskId=${currentTaskId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('attachmentsList');
+                    container.innerHTML = '';
+
+                    if (data.length === 0) {
+                        container.innerHTML = '<p class="text-muted">Вложений пока нет.</p>';
+                    } else {
+                        data.forEach(att => {
+                            const item = document.createElement('div');
+                            item.className = 'd-flex justify-content-between align-items-center border-bottom py-2';
+                            item.innerHTML = `
+                                <div>
+                                    <a href="${att.url}" target="_blank">${att.url.split('/').pop()}</a><br>
+                                    <small class="text-muted">Загружено: ${att.userName} (${att.uploadDate})</small>
+                                </div>
+                                ${att.canDelete ? `<button class="btn btn-sm btn-danger" onclick="deleteAttachment(${att.id})">Удалить</button>` : ''}
+                            `;
+                            container.appendChild(item);
+                        });
+                    }
+
+                    // Проверка прав на загрузку
+                    fetch(`/Attachments/CanUpload?taskId=${currentTaskId}`)
+                        .then(res => res.json())
+                        .then(json => {
+                            document.getElementById('uploadForm').style.display = json.canUpload ? 'block' : 'none';
+                        });
+
+                    // Открытие модального окна без затемнения
+                    const modalElement = document.getElementById('attachmentsModal');
+                    new bootstrap.Modal(modalElement, {
+                        backdrop: false
+                    }).show();
+                });
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch(`/Attachments/Upload?taskId=${currentTaskId}`, {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Ошибка загрузки");
+                    return res.json();
+                })
+                .then(() => openAttachmentsModal()) // перезагружаем список
+                .catch(err => alert(err.message));
+        });
+
+        function deleteAttachment(id) {
+            if (!confirm("Удалить вложение?")) return;
+            fetch(`/Attachments/Delete?id=${id}`, {
+                method: 'POST'
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Ошибка удаления");
+                    openAttachmentsModal(); // обновим список
+                })
+                .catch(err => alert(err.message));
         }
     </script>
 }
