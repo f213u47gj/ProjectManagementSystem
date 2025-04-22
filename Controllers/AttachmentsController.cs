@@ -44,7 +44,7 @@ public class AttachmentsController : Controller
 
             var allowedExtensions = new[] {
             ".pdf", ".docx", ".xlsx", ".jpg", ".png", ".txt",
-            ".cs", ".py", ".html", ".js", ".cshtml", ".json", ".sql"
+            ".cs", ".py", ".html", ".js", ".cshtml", ".json", ".sql", ".pptx"
         };
 
             var extension = Path.GetExtension(file.FileName).ToLower();
