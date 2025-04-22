@@ -899,7 +899,8 @@
                     // Открытие модального окна без затемнения
                     const modalElement = document.getElementById('attachmentsModal');
                     new bootstrap.Modal(modalElement, {
-                        backdrop: false
+                        backdrop: true,
+                        keyboard: true
                     }).show();
                 });
         }
