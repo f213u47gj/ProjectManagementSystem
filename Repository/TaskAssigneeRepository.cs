@@ -79,5 +79,12 @@ namespace ProjectManagementSystem.Repositories
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         }
+
+        public async Task<bool> IsUserAssignedToAnyTaskInProject(int projectId, string userId)
+        {
+            return await _context.TaskAssignees
+                .AnyAsync(ta => ta.UserId == userId && ta.ProjectTask.ProjectId == projectId);
+        }
+
     }
 }

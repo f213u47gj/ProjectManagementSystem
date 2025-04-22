@@ -279,9 +279,16 @@
         else
         {
             <li><button class="dropdown-item" onclick="viewTask()">Просмотр задачи</button></li>
+
+            @if (Model.IsAssignee)
+            {
+                <li><button class="dropdown-item" onclick="openAttachmentsModal()">Вложения</button></li>
+            }
         }
     </ul>
 </div>
+
+
 
 @section Scripts {
     <script>

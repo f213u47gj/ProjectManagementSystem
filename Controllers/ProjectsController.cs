@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManagementSystem.IRepositories;
 using ProjectManagementSystem.Models;
-using ProjectManagementSystem.Repositories;
 using ProjectManagementSystem.ViewModels.forProject;
 using ProjectManagementSystem.ViewModels.Tasks;
 
@@ -16,20 +15,23 @@ namespace ProjectManagementSystem.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IProjectTaskRepository _taskRepository;
         private readonly IProjectMemberRepository _memberRepository;
-        private IUserRepository _userRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly ITaskAssigneeRepository _taskAssigneeRepository;
 
         public ProjectsController(
             IProjectRepository projectRepository,
             UserManager<User> userManager,
             IProjectTaskRepository taskRepository,
             IProjectMemberRepository memberRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            ITaskAssigneeRepository taskAssigneeRepository)
         {
             _projectRepository = projectRepository;
             _userManager = userManager;
             _taskRepository = taskRepository;
             _memberRepository = memberRepository;
             _userRepository = userRepository;
+            _taskAssigneeRepository = taskAssigneeRepository;
         }
 
         public async Task<IActionResult> Index()
@@ -78,21 +80,13 @@ namespace ProjectManagementSystem.Controllers
 
             var tasks = await _taskRepository.GetTasksByProjectIdAsync(id);
             var members = await _memberRepository.GetProjectMembersAsync(id);
-            var currentUserId = _userManager.GetUserId(User);
-            var currentUser = await _userRepository.GetUserByIdAsync(currentUserId);
+            var currentUser = await _userRepository.GetUserByIdAsync(userId);
 
+            string currentUserRole = project.OwnerId == userId
+                ? "Owner"
+                : members.FirstOrDefault(m => m.UserId == userId)?.Role ?? "Member";
 
-            string currentUserRole;
-
-            if (project.OwnerId == userId)
-            {
-                currentUserRole = "Owner";
-            }
-            else
-            {
-                var currentMember = members.FirstOrDefault(m => m.UserId == userId);
-                currentUserRole = currentMember?.Role ?? "Member";
-            }
+            var isAssignee = await _taskAssigneeRepository.IsUserAssignedToAnyTaskInProject(id, userId);
 
             var viewModel = new BoardViewModel
             {
@@ -100,7 +94,8 @@ namespace ProjectManagementSystem.Controllers
                 Tasks = tasks.ToList(),
                 Members = members.ToList(),
                 CurrentUserRole = currentUserRole,
-                CurrentUser = currentUser
+                CurrentUser = currentUser,
+                IsAssignee = isAssignee
             };
 
             return View(viewModel);

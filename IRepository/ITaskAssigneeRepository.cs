@@ -10,5 +10,6 @@ namespace ProjectManagementSystem.IRepositories
         Task<IEnumerable<User>> GetAssigneesForTaskAsync(int taskId);
         Task<IEnumerable<User>> GetAvailableMembersForTaskAsync(int taskId);
         Task<User?> GetAssigneeInfoAsync(string userId);
+        Task<bool> IsUserAssignedToAnyTaskInProject(int projectId, string userId);
     }
 }
