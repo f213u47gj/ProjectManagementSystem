@@ -5,6 +5,7 @@
 }
 
 <link rel="stylesheet" href="~/css/board.css" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
 @functions {
     public string GetStatusTitle(string status)
@@ -58,7 +59,7 @@
                                 <p class="card-text">Описание: @task.Description</p>
                                 <p class="card-text">Срок сдачи: @task.DueDate?.ToString("dd.MM.yyyy")</p>
 
-                                <div class="task-assignees mt-2">
+                                <div class="task-assignees mt-2 mb-2">
                                     @if (task.Assignees != null && task.Assignees.Any())
                                     {
                                         foreach (var assignee in task.Assignees)
@@ -78,6 +79,17 @@
                                     {
                                         <small class="text-muted">Нет назначенных исполнителей</small>
                                     }
+                                </div>
+
+                                <div class="d-flex justify-content-start gap-3 text-muted small">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-chat-dots me-1"></i>
+                                        <span>@(task.Comments?.Count ?? 0)</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-paperclip me-1"></i>
+                                        <span>@(task.Attachments?.Count ?? 0)</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
