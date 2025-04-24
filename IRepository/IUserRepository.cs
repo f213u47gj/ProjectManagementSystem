@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using ProjectManagementSystem.Models;
 using ProjectManagementSystem.ViewModels;
-using ProjectManagementSystem.ViewModels.forUser;
+using ProjectManagementSystem.ViewModels.forAccount;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;

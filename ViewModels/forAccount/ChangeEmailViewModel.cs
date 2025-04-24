@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ProjectManagementSystem.ViewModels.forUser
+namespace ProjectManagementSystem.ViewModels.forAccount
 {
     public class ChangeEmailViewModel
     {

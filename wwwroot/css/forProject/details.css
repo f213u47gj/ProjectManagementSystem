@@ -1,0 +1,143 @@
+﻿.project-details-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.project-details-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    padding: 2rem;
+}
+
+.project-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.project-title {
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.project-meta {
+    margin-top: 1rem;
+}
+
+.project-edit-form {
+    margin-top: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s;
+}
+
+    .form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+textarea.form-control {
+    min-height: 150px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.project-info {
+    margin-top: 1.5rem;
+}
+
+.info-section {
+    margin-bottom: 2rem;
+}
+
+    .info-section h3 {
+        color: #2c3e50;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+.description-box {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    line-height: 1.6;
+}
+
+.project-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.stat-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+    .stat-item i {
+        font-size: 1.25rem;
+        color: #3498db;
+    }
+
+.back-btn {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+    .btn-primary:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+    }
+
+@media (max-width: 768px) {
+    .project-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .back-btn {
+        margin-top: 1rem;
+        align-self: flex-end;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+}

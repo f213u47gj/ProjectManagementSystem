@@ -112,46 +112,13 @@
     </div>
 </div>
 
-<style>
-    .avatar-sm {
-        width: 32px;
-        height: 32px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
+@section Styles {
+    <link rel="stylesheet" href="~/css/forAdmin/project-admin.css" />
+}
 
-    .avatar-title {
-        font-size: 0.875rem;
-        font-weight: 600;
-    }
-
-    .table-hover tbody tr:hover {
-        background-color: rgba(13, 110, 253, 0.05);
-    }
-
-    .dropdown-menu {
-        max-height: 300px;
-        overflow-y: auto;
-    }
-
-    .badge {
-        font-weight: 500;
-        letter-spacing: 0.5px;
-    }
-
-    .text-truncate {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-</style>
-
-<script>
-    $(document).ready(function () {
-        $('[data-bs-toggle="tooltip"]').tooltip();
-    });
-</script>
+@section Scripts {
+    <script src="~/js/forAdmin/project-admin.js"></script>
+}
 
 @functions {
     string GetRoleBadgeClass(string role)

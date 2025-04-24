@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManagementSystem.IRepositories;
 using ProjectManagementSystem.Models;
-using ProjectManagementSystem.ViewModels.forUser;
+using ProjectManagementSystem.ViewModels.forAccount;
 
 namespace ProjectManagementSystem.Controllers
 {

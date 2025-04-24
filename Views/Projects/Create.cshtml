@@ -3,19 +3,42 @@
     ViewData["Title"] = "Создать проект";
 }
 
-<div class="container mt-4">
-    <h2>Создать проект</h2>
+<div class="project-create-container">
+    <div class="project-create-card">
+        <div class="project-create-header">
+            <h2><i class="fas fa-plus-circle me-2"></i>Создать новый проект</h2>
+            <p class="text-muted">Заполните основные данные о проекте</p>
+        </div>
 
-    <form asp-action="Create" method="post">
-        <div class="mb-3">
-            <label class="form-label">Название</label>
-            <input asp-for="Name" class="form-control" />
-            <span asp-validation-for="Name" class="text-danger"></span>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Описание</label>
-            <textarea asp-for="Description" class="form-control"></textarea>
-        </div>
-        <button type="submit" class="btn btn-success">Создать</button>
-    </form>
+        <form asp-action="Create" method="post" class="project-create-form">
+            <div class="form-group">
+                <label asp-for="Name" class="form-label">
+                    <i class="fas fa-heading me-2"></i>Название проекта
+                </label>
+                <input asp-for="Name" class="form-control" placeholder="Введите название проекта" />
+                <span asp-validation-for="Name" class="text-danger validation-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Description" class="form-label">
+                    <i class="fas fa-align-left me-2"></i>Описание
+                </label>
+                <textarea asp-for="Description" class="form-control" rows="4"
+                          placeholder="Опишите основные цели и задачи проекта"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-create">
+                    <i class="fas fa-check me-2"></i>Создать проект
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>Отмена
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/forProject/create.css" />
+}

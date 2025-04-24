@@ -115,7 +115,7 @@ h4.text-center {
     transition: background-color 0.2s ease;
 }*/
 
-.task-card {
+/*.task-card {
     cursor: grab;
     transition: transform 0.1s ease, box-shadow 0.1s ease;
     user-select: none;
@@ -133,4 +133,4 @@ h4.text-center {
 
     .task-card:hover {
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    }
+    }*/

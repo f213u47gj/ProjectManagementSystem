@@ -1,0 +1,48 @@
+﻿.avatar-sm {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.card-header {
+    padding: 1rem 1.5rem;
+}
+
+.table-responsive {
+    margin-top: 1rem;
+}
+
+.form-select-sm {
+    width: auto;
+    display: inline-block;
+}
+
+.text-end .d-flex {
+    justify-content: flex-end;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}

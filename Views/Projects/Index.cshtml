@@ -7,51 +7,47 @@
     var currentUserId = UserManager.GetUserId(User);
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Мои проекты</h2>
+<div class="projects-container">
+    <div class="projects-header">
+        <h2>Мои проекты</h2>
         <a href="/Projects/Create" class="btn btn-primary">+ Новый проект</a>
     </div>
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info">У вас пока нет проектов.</div>
+        <div class="no-projects-alert">У вас пока нет проектов.</div>
     }
     else
     {
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <div class="projects-grid">
             @foreach (var project in Model)
             {
-                <div class="col">
-                    <div class="position-relative d-inline-block project-card" data-project-id="@project.Id" style="width: 300px; margin: 10px;">
-                        <div class="card h-100 shadow-sm border border-light rounded hover-card project-card" data-project-id="@project.Id">
-                            @if (project.OwnerId == currentUserId)
-                            {
-                                <button class="btn btn-sm btn-link position-absolute top-0 end-0 text-danger"
-                                        onclick="confirmDeleteProject('@project.Name', '@project.Id')"
-                                        style="z-index: 1;">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            }
-
-                            <a href="@Url.Action("Board", "Projects", new { id = project.Id })" class="text-decoration-none text-dark">
-                                <div class="card-body">
-                                    <h5 class="card-title">@project.Name</h5>
-                                    <p class="card-text text-muted" style="border: 2px dashed #ccc;padding: 10px; border-radius: 10px;">
-                                        @project.Description
-                                    </p>
-                                </div>
-                            </a>
-                        </div>
-
+                <div class="project-item">
+                    <div class="project-card" data-project-id="@project.Id">
                         @if (project.OwnerId == currentUserId)
                         {
-                            <div id="context-menu-@project.Id" class="context-menu position-absolute bg-white border rounded shadow-sm"
-                                 style="display:none; z-index: 1000; min-width: 160px;">
-                                <button onclick="confirmDeleteProject('@project.Name', '@project.Id')">Удалить</button>
-                            </div>
+                            <button class="delete-project-btn"
+                                    onclick="confirmDeleteProject('@project.Name', '@project.Id')">
+                                <i class="fas fa-times"></i>
+                            </button>
                         }
+
+                        <a href="@Url.Action("Board", "Projects", new { id = project.Id })" class="project-link">
+                            <div class="project-card-body">
+                                <h5 class="project-title">@project.Name</h5>
+                                <p class="project-description">
+                                    @project.Description
+                                </p>
+                            </div>
+                        </a>
                     </div>
+
+                    @if (project.OwnerId == currentUserId)
+                    {
+                        <div id="context-menu-@project.Id" class="context-menu">
+                            <button onclick="confirmDeleteProject('@project.Name', '@project.Id')">Удалить</button>
+                        </div>
+                    }
                 </div>
             }
         </div>
@@ -60,10 +56,10 @@
 
 <div id="deleteProjectModal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white">
+        <div class="modal-content">
+            <div class="modal-header">
                 <h5 class="modal-title">Удалить проект</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
             <div class="modal-body">
                 <p>Вы действительно хотите удалить проект <strong id="projectToDeleteName"></strong>?</p>
@@ -78,76 +74,10 @@
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        function confirmDeleteProject(name, id) {
-            document.getElementById('projectToDeleteName').innerText = name;
-            document.getElementById('deleteProjectForm').action = '/Projects/Delete/' + id;
-            const modal = new bootstrap.Modal(document.getElementById('deleteProjectModal'));
-            modal.show();
-        }
-
-        document.querySelectorAll('.project-card').forEach(card => {
-            card.addEventListener('contextmenu', function (e) {
-                e.preventDefault();
-
-                document.querySelectorAll('.context-menu').forEach(menu => menu.style.display = 'none');
-
-                const menu = this.querySelector('.context-menu');
-                if (menu) {
-                    menu.style.display = 'block';
-
-                    const rect = this.getBoundingClientRect();
-                    const offsetX = e.clientX - rect.left;
-                    const offsetY = e.clientY - rect.top;
-
-                    menu.style.left = `${offsetX}px`;
-                    menu.style.top = `${offsetY}px`;
-                }
-            });
-        });
-
-        document.addEventListener('click', function () {
-            document.querySelectorAll('.context-menu').forEach(menu => menu.style.display = 'none');
-        });
-    </script>
-
+@section Styles {
+    <link rel="stylesheet" href="~/css/forProject/index.css" />
 }
 
-<style>
-    .hover-card {
-        transition: background-color 0.3s ease;
-        cursor: pointer;
-    }
-
-        .hover-card:hover {
-            background-color: #f8f9fa;
-        }
-
-    .context-menu {
-        position: absolute;
-        min-width: 160px;
-        background-color: white;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        z-index: 9999;
-        display: none;
-    }
-
-        .context-menu button {
-            width: 100%;
-            background: none;
-            border: none;
-            text-align: left;
-            padding: 10px 16px;
-            font-size: 14px;
-            color: #dc3545;
-        }
-
-            .context-menu button:hover {
-                background-color: #f8d7da;
-            }
-</style>
-
-
+@section Scripts {
+    <script src="~/js/forProject/index.js"></script>
+}

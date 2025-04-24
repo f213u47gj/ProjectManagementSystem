@@ -1,48 +1,80 @@
 ﻿@model ProjectManagementSystem.Models.Project
-
 @{
     ViewData["Title"] = "Детали проекта";
     var isOwner = User.Identity?.Name == Model.Owner?.UserName;
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm rounded-4 border-0">
-                <div class="card-body p-4">
-                    <h2 class="mb-4">Проект: <span class="text-primary">@Model.Name</span></h2>
+<div class="project-details-container">
+    <div class="project-details-card">
+        <div class="project-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="project-title">
+                    <i class="fas fa-project-diagram me-2"></i>@Model.Name
+                </h1>
+            </div>
 
-                    @if (isOwner)
-                    {
-                        <form asp-action="UpdateDetails" method="post">
-                            <input type="hidden" name="Id" value="@Model.Id" />
+        @if (isOwner)
+        {
+            <form asp-action="UpdateDetails" method="post" class="project-edit-form">
+                <input type="hidden" name="Id" value="@Model.Id" />
 
-                            <div class="mb-3">
-                                <label class="form-label">Название</label>
-                                <input name="Name" class="form-control" value="@Model.Name" required />
-                            </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-heading me-2"></i>Название проекта
+                    </label>
+                    <input name="Name" class="form-control" value="@Model.Name" required />
+                </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Описание</label>
-                                <textarea name="Description" class="form-control" rows="4" required>@Model.Description</textarea>
-                            </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-align-left me-2"></i>Описание
+                    </label>
+                    <textarea name="Description" class="form-control" rows="5" required>@Model.Description</textarea>
+                </div>
 
-                            <button type="submit" class="btn btn-success">Сохранить</button>
-                            <a class="btn btn-outline-secondary ms-2" href="@Url.Action("Board", "Projects", new { id = Model.Id })">Назад</a>
-                        </form>
-                    }
-                    else
-                    {
-                        <div class="mb-3">
-                            <p><strong>Название:</strong> @Model.Name</p>
-                            <p><strong>Описание:</strong> @Model.Description</p>
-                            <p><strong>Владелец:</strong> @Model.Owner?.UserName</p>
-                            <p><strong>Создан:</strong> @Model.CreatedAt.ToLocalTime().ToString("dd MMMM yyyy, HH:mm")</p>
-                            <a href="@Url.Action("Board", "Projects", new { id = Model.Id })" class="btn btn-secondary mt-2">← Назад к доске</a>
-                        </div>
-                    }
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Сохранить изменения
+                    </button>
+                    <a href="@Url.Action("Board", "Projects", new { id = Model.Id })"
+                       class="btn btn-outline-secondary">
+                        Отмена
+                    </a>
+                </div>
+            </form>
+        }
+        else
+        {
+            <div class="project-info">
+                <div class="info-section">
+                    <h3><i class="fas fa-info-circle me-2"></i>Описание проекта</h3>
+                    <div class="description-box">
+                        @Model.Description
+                    </div>
+                </div>
+
+                <div class="project-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Владелец: @Model.Owner?.UserName</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="far fa-calendar-check"></i>
+                        <span>Создан: @Model.CreatedAt.ToLocalTime().ToString("dd MMMM yyyy")</span>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="@Url.Action("Board", "Projects", new { id = Model.Id })"
+                       class="btn btn-primary">
+                        <i class="fas fa-tasks me-1"></i> Перейти к доске проекта
+                    </a>
                 </div>
             </div>
-        </div>
+        }
     </div>
 </div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/forProject/details.css" />
+}

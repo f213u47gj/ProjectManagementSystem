@@ -1,64 +1,115 @@
-﻿@if ((bool)ViewBag.CanManage)
-{
-    <form asp-action="AddMember" method="post" class="mb-3">
-        <input type="hidden" name="projectId" value="@Model.ProjectId" />
-        <div class="input-group">
-            <input type="email" name="email" class="form-control" placeholder="Email участника" required />
-            <button class="btn btn-primary" type="submit">Добавить</button>
-        </div>
-    </form>
-}
-
+﻿@model ProjectManagementSystem.ViewModels.forProject.ProjectMembersViewModel
 @{
     ViewData["Title"] = "Участники проекта";
 }
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Пользователь (Роль)</th>
-            <th>Изменение роли</th>
-            <th>Удаление</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var member in Model.Members)
+<div class="members-container">
+    <div class="members-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">
+                <i class="fas fa-users me-2"></i>Участники проекта
+            </h2>
+            <a href="@Url.Action("Board", "Projects", new { id = Model.ProjectId })"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Назад к проекту
+            </a>
+        </div>
+    </div>
+
+    @if ((bool)ViewBag.CanManage)
+    {
+        <div class="add-member-form mt-4">
+            <form asp-action="AddMember" method="post">
+                <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                <div class="input-group">
+                    <input type="email" name="email" class="form-control"
+                           placeholder="Введите email участника" required />
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-user-plus me-1"></i> Добавить
+                    </button>
+                </div>
+            </form>
+        </div>
+    }
+
+    <div class="members-table-container mt-4">
+        <table class="members-table">
+            <thead>
+                <tr>
+                    <th>Участник</th>
+                    <th>Роль</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var member in Model.Members)
+                {
+                    <tr class="member-row">
+                        <td class="member-info">
+                            <div class="avatar-sm">
+                                <div class="avatar-title bg-light rounded-circle text-primary">
+                                    @member.User?.UserName[0].ToString().ToUpper()
+                                </div>
+                            </div>
+                            <div>
+                                <div class="member-name">@member.User?.UserName</div>
+                                <div class="member-email">@member.User?.Email</div>
+                            </div>
+                        </td>
+                        <td class="member-role">
+                            <span class="role-badge @GetRoleBadgeClass(member.Role)">
+                                @member.Role
+                            </span>
+                        </td>
+                        <td class="member-actions">
+                            @if ((bool)ViewBag.CanManage)
+                            {
+                                <form asp-action="ChangeRole" method="post" class="role-form">
+                                    <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                                    <input type="hidden" name="userId" value="@member.UserId" />
+                                    <div class="input-group">
+                                        <select name="newRole" class="form-select form-select-sm">
+                                            <option value="Member" selected="@(member.Role == "Member")">Участник</option>
+                                            <option value="Manager" selected="@(member.Role == "Manager")">Менеджер</option>
+                                        </select>
+                                        <button class="btn btn-sm btn-outline-primary" type="submit" title="Изменить роль">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                                <form asp-action="RemoveMember" method="post"
+                                      onsubmit="return confirm('Вы уверены, что хотите удалить этого участника?');">
+                                    <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                                    <input type="hidden" name="userId" value="@member.UserId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Только просмотр</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/forProjectMember/members.css" />
+}
+
+@functions {
+    string GetRoleBadgeClass(string role)
+    {
+        return role switch
         {
-            <tr>
-                <td>
-                    @member.User?.UserName (@member.User?.Email) —
-                    <strong>@member.Role</strong>
-                </td>
-                <td>
-                    @if ((bool)ViewBag.CanManage)
-                    {
-                        <form asp-action="ChangeRole" method="post" class="d-flex gap-2">
-                            <input type="hidden" name="projectId" value="@Model.ProjectId" />
-                            <input type="hidden" name="userId" value="@member.UserId" />
-                            <select name="newRole" class="form-select form-select-sm">
-                                <option selected disabled>Изменить роль</option>
-                                <option value="Member">Участник</option>
-                                <option value="Manager">Менеджер</option>
-                            </select>
-                            <button class="btn btn-sm btn-secondary" type="submit">Изменить</button>
-                        </form>
-                    }
-                    else
-                    {
-                        <span class="text-muted">Нет доступа</span>
-                    }
-                </td>
-                <td>
-                    @if ((bool)ViewBag.CanManage)
-                    {
-                        <form asp-action="RemoveMember" method="post">
-                            <input type="hidden" name="projectId" value="@Model.ProjectId" />
-                            <input type="hidden" name="userId" value="@member.UserId" />
-                            <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
-                        </form>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+            "Manager" => "bg-warning text-dark",
+            "Member" => "bg-secondary",
+            _ => "bg-light text-dark"
+        };
+    }
+}
