@@ -68,6 +68,12 @@ namespace ProjectManagementSystem.Repositories
                     .ToListAsync();
                 _context.TaskAssignees.RemoveRange(assignees);
 
+                var attachments = await _context.Attachments
+                    .Where(a => a.ProjectTaskId == taskId)
+                    .ToListAsync();
+
+                _context.Attachments.RemoveRange(attachments);
+
                 _context.ProjectTasks.Remove(task);
 
                 await _context.SaveChangesAsync();
