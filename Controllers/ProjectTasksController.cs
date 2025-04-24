@@ -183,5 +183,32 @@ namespace ProjectManagementSystem.Controllers
 
             return PartialView("_TaskModal", viewModel);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateStatus(int id, string status)
+        {
+            var task = await _taskRepository.GetTaskByIdAsync(id);
+            if (task == null)
+            {
+                return NotFound("Задача не найдена");
+            }
+
+            if (!await UserHasRoleAsync(task.ProjectId, "Owner", "Manager", "Developer"))
+            {
+                return Forbid();
+            }
+
+            var validStatuses = new[] { "ToDo", "InProgress", "Done" };
+            if (!validStatuses.Contains(status))
+            {
+                return BadRequest("Недопустимый статус задачи");
+            }
+
+            task.Status = status;
+            await _taskRepository.UpdateTaskAsync(task);
+
+            return Ok();
+        }
     }
 }

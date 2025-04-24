@@ -41,19 +41,15 @@
         </div>
     </div>
 
-    <div id="board"
-         class="row p-4 mb-5"
-         style="min-width: 1500px; min-height: 700px; border: 3px dashed #ccc; border-radius: 8px;"
-         oncontextmenu="openCreateModal(event)">
-
+    <div id="board" class="row p-4 mb-5 kanban-board">
         @foreach (var status in new[] { "ToDo", "InProgress", "Done" })
         {
-            <div class="col-md-4">
+            <div class="col-md-4 kanban-column" data-status="@status">
                 <h4 class="text-center mb-3">@GetStatusTitle(status)</h4>
-                <div class="d-flex flex-column gap-2">
+                <div class="d-flex flex-column gap-2 task-container" id="container-@status">
                     @foreach (var task in Model.Tasks.Where(t => t.Status == status))
                     {
-                        <div class="card task-card" data-task-id="@task.Id" oncontextmenu="showTaskContextMenu(event, @task.Id)">
+                        <div class="card task-card" data-task-id="@task.Id" data-status="@task.Status" oncontextmenu="showTaskContextMenu(event, @task.Id)">
                             <div class="card-body">
                                 <h5 class="card-title">@task.Title</h5>
                                 <p class="card-text">Описание: @task.Description</p>
@@ -69,7 +65,7 @@
                                                      class="rounded-circle me-1"
                                                      width="24"
                                                      height="24"
-                                                     onerror="this.src='/img/default-avatar.png'"
+                                                     onerror="this.src='/images/default-avatar.png'"
                                                      alt="@assignee.User?.UserName">
                                                 <small>@assignee.User?.UserName</small>
                                             </div>
@@ -954,5 +950,123 @@
                 })
                 .catch(err => alert(err.message));
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initDragAndDrop();
+
+            function initDragAndDrop() {
+                const taskCards = document.querySelectorAll('.task-card');
+                const columns = document.querySelectorAll('.kanban-column');
+
+                // Делаем карточки перетаскиваемыми
+                taskCards.forEach(card => {
+                    card.setAttribute('draggable', 'true'); // Это критически важно!
+                    card.addEventListener('dragstart', handleDragStart);
+                    card.addEventListener('dragend', handleDragEnd);
+                });
+
+                // Настройка зон для перетаскивания
+                columns.forEach(column => {
+                    column.addEventListener('dragover', handleDragOver);
+                    column.addEventListener('dragleave', handleDragLeave);
+                    column.addEventListener('drop', handleDrop);
+                });
+            }
+
+            function handleDragStart(e) {
+                this.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', this.dataset.taskId);
+
+                // Важно для Firefox
+                e.dataTransfer.effectAllowed = 'move';
+
+                setTimeout(() => {
+                    this.style.opacity = '0.4';
+                }, 0);
+            }
+
+            function handleDragEnd() {
+                this.classList.remove('dragging');
+                this.style.opacity = '1';
+            }
+
+            function handleDragOver(e) {
+                e.preventDefault(); // Это обязательно!
+                this.classList.add('drag-over');
+
+                // Определяем позицию для вставки
+                const draggingCard = document.querySelector('.dragging');
+                if (!draggingCard) return;
+
+                const afterElement = getDragAfterElement(this, e.clientY);
+                const container = this.querySelector('.task-container');
+
+                if (afterElement == null) {
+                    container.appendChild(draggingCard);
+                } else {
+                    container.insertBefore(draggingCard, afterElement);
+                }
+            }
+
+            function handleDragLeave() {
+                this.classList.remove('drag-over');
+            }
+
+            function handleDrop(e) {
+                e.preventDefault(); // Это обязательно!
+                this.classList.remove('drag-over');
+
+                const taskId = e.dataTransfer.getData('text/plain');
+                const taskCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+                const newStatus = this.dataset.status;
+
+                // Если статус не изменился - ничего не делаем
+                if (taskCard.dataset.status === newStatus) return;
+
+                updateTaskStatus(taskId, newStatus)
+                    .then(() => {
+                        taskCard.dataset.status = newStatus;
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                        // Возвращаем карточку на место при ошибке
+                        const originalColumn = document.querySelector(`.kanban-column[data-status="${taskCard.dataset.status}"]`);
+                        originalColumn.querySelector('.task-container').appendChild(taskCard);
+                        alert('Не удалось обновить статус задачи');
+                    });
+            }
+
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.task-card:not(.dragging)')];
+
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+
+            function updateTaskStatus(taskId, newStatus) {
+                const formData = new FormData();
+                formData.append('id', taskId);
+                formData.append('status', newStatus);
+
+                return fetch('/ProjectTasks/UpdateStatus', {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: formData
+                }).then(response => {
+                    if (!response.ok) throw new Error('Ошибка сервера');
+                    return response.text();
+                });
+            }
+        });
     </script>
 }
